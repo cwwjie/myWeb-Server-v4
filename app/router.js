@@ -3,7 +3,6 @@ module.exports = app => {
 
     router.get('/', controller.home.index); // 首页部分
 
-    router.get('/mobile', controller.mobile.index); // 手机端
-
-    router.get('/mobile/getdynamics', controller.mobile.getdynamics); // 手机端
+    router.get('/dynamic', controller.dynamic.index); // 动态部分
+    router.get('/dynamic/getbylist', controller.dynamic.getbylist); // 动态
 };

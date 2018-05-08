@@ -16,5 +16,9 @@ module.exports = {
             password: 'QQ1938167', // 密码
             database: 'rejiejay',  // 数据库名
         },
+    },
+
+    security: { // 跨域请求
+        domainWhiteList: [ 'http://localhost:8888' ],
     }
 };

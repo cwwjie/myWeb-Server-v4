@@ -10,7 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "egg": "^2.8.1",
-    "egg-mysql": "^3.0.0"
+    "egg-cors": "^2.0.0",
+    "egg-mysql": "^3.0.0",
+    "lodash": "^4.17.10"
   },
   "devDependencies": {
     "egg-bin": "^4.7.0"

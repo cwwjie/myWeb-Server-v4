@@ -8,7 +8,7 @@ module.exports = {
     success: (data, message) => ({
         'result': 1,
         'data': data || null,
-        'message': message || 'request is success'
+        'message': message || 'success'
     }),
 
     /**
