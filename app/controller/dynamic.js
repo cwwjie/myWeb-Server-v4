@@ -1,5 +1,6 @@
 const Controller = require('egg').Controller;
-const consequence = require('./../utils/consequence');
+
+const consequencer = require('./../utils/consequencer');
 const lodash = require('lodash');
 
 class DynamicController extends Controller {
@@ -12,7 +13,7 @@ class DynamicController extends Controller {
     let records = await this.ctx.service.dynamic.getRecords();
     let groups = await this.ctx.service.dynamic.getGroups();
 
-    this.ctx.body = consequence.success({
+    this.ctx.body = consequencer.success({
       // 这里暂时分出一个 dynamics 因为以后会有分页的需求
       dynamics: records.map(record => {
         let groupsIndex = lodash.findIndex(groups, group => group.id === record.group_id); // 查询对应分组
@@ -117,7 +118,7 @@ class DynamicController extends Controller {
       return true
     });
 
-    this.ctx.body = consequence.success({ // 将结果封装 并且返回请求
+    this.ctx.body = consequencer.success({ // 将结果封装 并且返回请求
       list: allList,
       group: allGroup,
     })
