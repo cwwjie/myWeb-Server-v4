@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "egg-bin dev",
-    "start": "egg-scripts start --daemon --title=server",
-    "stop": "egg-scripts stop --title=server"
+    "eggstart": "egg-scripts start --daemon --title=server",
+    "eggstop": "egg-scripts stop --title=server"
   },
   "author": "rejiejay",
   "license": "ISC",
