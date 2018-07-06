@@ -1,4 +1,4 @@
-const convertTime = {
+const convertTimer = {
   /**
    * Date 转换 xxxx-xx-xx 字符串
    * @param {Date} myDate 要转换的日期
@@ -83,4 +83,4 @@ const convertTime = {
   }
 }
 
-module.exports = convertTime;
+module.exports = convertTimer;
