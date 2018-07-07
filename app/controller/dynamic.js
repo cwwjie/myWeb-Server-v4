@@ -33,7 +33,6 @@ class DynamicController extends Controller {
     });
   }
 
-
   /**
    * 返回所有的动态记录 根据列表与分组的形式
    * @return {object} {

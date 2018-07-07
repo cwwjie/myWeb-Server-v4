@@ -8,6 +8,11 @@ module.exports = app => {
     router.get('/dynamic/get/list', controller.dynamic.getByList); // 返回所有的动态记录 根据列表的形式
     router.get('/dynamic/get/listandgroup', controller.dynamic.getByListAndGroup); // 返回所有的动态记录 根据列表与分组的形式
 
-    router.get('/record/', controller.record.index); // 保存一条记录
+    // 记录
+    router.get('/record/', controller.record.index); // 测试
     router.post('/record/save', controller.record.save); // 保存一条记录
+
+    // 微信
+    router.get('/weixin', controller.weixin.index); // 测试
+    router.post('/weixin/handle', controller.weixin.handle); // 微信验证开发者服务器
 };
