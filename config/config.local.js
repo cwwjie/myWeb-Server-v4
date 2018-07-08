@@ -6,6 +6,11 @@ module.exports = {
         }
     },
 
+    weixin: {
+        appID: 'wx34ce4f0ce6eadb39',
+        appsecret: '317b46c976749223abf57213fce07b0f'
+    },
+
     mysql: {
         app: true,    // 是否加载到 app 上，默认开启
         agent: false, // 是否加载到 agent 上，默认关闭

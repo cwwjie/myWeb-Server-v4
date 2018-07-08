@@ -31,7 +31,27 @@ class WeixinController extends Controller {
         }
     }
 
-    
+    /**
+     * 获取公众号的全局唯一接口调用凭据
+     * @return {string} access_token '11_Hi0KxrnvVN_RP47QqLd6_lkV8EAgKSLG_CL28rFgJd4eMaVc0g4jEOIgZ_BulbYXvKcGUTVfN6aaQHpY-xNxiTPO7c5xU_Yj7nRS7bpRtYPsT1K61xG2haGyAcgFzDl9KfCGmKBJyK9SKX8wYBMbAEAGJU'
+     */
+    async getGlobalAccess_token() {
+        let myAccessToken = await this.ctx.service.weixin.getGlobalAccess_token();
+
+        // 查询失败
+        if (myAccessToken.result !== 1) {
+            return this.ctx.body = myAccessToken;
+        }
+
+        // 查询成功
+        if (myAccessToken.data.value && typeof(myAccessToken.data.value) === 'string') { // 判断格式是否正确
+            return this.ctx.body = consequencer.success({
+                access_token: myAccessToken.data.value
+            });
+        } else {
+            return this.ctx.body = consequencer.error('查询数据格式有误!');
+        }
+    }
 }
 
 module.exports = WeixinController;

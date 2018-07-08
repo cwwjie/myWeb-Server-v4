@@ -15,4 +15,5 @@ module.exports = app => {
     // 微信
     router.get('/weixin', controller.weixin.index); // 测试
     router.get('/weixin/handle', controller.weixin.handle); // 微信验证开发者服务器
+    router.get('/weixin/get/global_access_token', controller.weixin.getGlobalAccess_token); // 微信验证开发者服务器
 };
