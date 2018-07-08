@@ -2,6 +2,7 @@ const https = require('https');
 
 /**
  * 封装 get 请求 返回json格式
+ * @param {string} url 请求的链接
  * @return {Promise} resolve: {}, reject: 'error';
  */
 module.exports = url => new Promise((resolve, reject) => {

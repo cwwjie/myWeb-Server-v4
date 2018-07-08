@@ -52,6 +52,16 @@ class WeixinController extends Controller {
             return this.ctx.body = consequencer.error('查询数据格式有误!');
         }
     }
+
+    /**
+     * 创建菜单界面
+     * @return {boolen} 是否成功创建
+     */
+    async createMenu() {
+        
+    }
+
+    
 }
 
 module.exports = WeixinController;

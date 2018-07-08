@@ -14,12 +14,12 @@ class weixinService extends Service {
         appID = this.config.weixin.appID,
         appsecret = this.config.weixin.appsecret;
 
-        let requestToken = await getjsonby(grant_type, appID, appsecret)
+        let requestToken = await getjsonby(`https://api.weixin.qq.com/cgi-bin/token?grant_type=${grant_type}&appid=${appID}&secret=${appsecret}`)
         .then(
             val => {
                 // val = {
                 //     "access_token": "ACCESS_TOKEN",
-                //     "expires_in": 7200
+                //     "expires_in": 7200000
                 // }
                 if (val.errcode) {
                     let errorMessage = ({
@@ -43,15 +43,17 @@ class weixinService extends Service {
         }
 
         // 请求成功
-        let expire_timestamp = Date.parse(new Date()) + 7200;
+        let expire_timestamp = Date.parse(new Date()) + 7200000;
         let access_token = requestToken.data;
         await this.ctx.app.mysql.query(`update weixin set value='${access_token}',expire_timestamp='${expire_timestamp}' where  my_key='global_access_token';`);
 
         // 判断是否更新成功
         let global_access_token = await this.ctx.app.mysql.query("select * from weixin where my_key='global_access_token';");
         if (global_access_token[0].value === access_token) {
+
             return requestToken;
         } else {
+
             return consequencer.error('更新失败', 200, access_token);
         }
 
@@ -74,7 +76,8 @@ class weixinService extends Service {
 
         // 判断是否过期
         let mytoken = global_access_token[0];
-        if ((Date.parse(new Date()) + 7200) < mytoken.expire_timestamp) {
+        if (Date.parse(new Date()) < parseInt(mytoken.expire_timestamp)) {
+            // 现在日期 小于 过期时间
             return consequencer.success(mytoken);
         }
 
@@ -84,7 +87,7 @@ class weixinService extends Service {
             return consequencer.success({
                 "my_key": "global_access_token",
                 "value": refreshAccessToken.data,
-                "expire_timestamp": (Date.parse(new Date()) + 7200 - 5)
+                "expire_timestamp": (Date.parse(new Date()) + 7200000 - 5)
             });
         } else {
             return refreshAccessToken;
