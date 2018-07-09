@@ -1,6 +1,7 @@
 const Controller = require('egg').Controller;
 const consequencer = require('./../utils/consequencer');
 const encryption = require('./../utils/encryption');
+const postjsonby = require('./../utils/postjsonbyhttps');
 
 class WeixinController extends Controller {
     async index() {
@@ -58,10 +59,32 @@ class WeixinController extends Controller {
      * @return {boolen} 是否成功创建
      */
     async createMenu() {
+        let myAccessToken = await this.ctx.service.weixin.getGlobalAccess_token();
         
-    }
+        // 查询失败
+        if (myAccessToken.result !== 1) {
+            return this.ctx.body = consequencer.error(`获取access_token失败! 原因: ${myAccessToken.message}`);
+        }
 
-    
+
+        let myMenu = [
+            {
+                'type': 'click',
+                'name': '测试按钮',
+                'key': 'V1001_TODAY_MUSIC'
+            }
+        ];
+        let mycreate = await postjsonby(
+            'api.weixin.qq.com', 
+            `/cgi-bin/menu/create?access_token=${myAccessToken.data.value}`, 
+            myMenu
+        ).then(
+            success => consequencer.success(success),
+            error => consequencer.error(error)
+        );
+
+        return this.ctx.body = mycreate;
+    }
 }
 
 module.exports = WeixinController;
