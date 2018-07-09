@@ -27,7 +27,7 @@ module.exports = (hostname, path, reqData) => new Promise((resolve, reject) => {
 
         if (res.statusCode !== 200) {
             res.resume();
-            return reject(`请求成功, 但是返回失败状态码. 原因: ${res}`);
+            return reject(`请求成功, 但是返回失败状态码. 原因: ${JSON.stringify(res)}`);
         }
 
         if (!/^application\/json/.test(res.headers['content-type'])) {
@@ -48,7 +48,7 @@ module.exports = (hostname, path, reqData) => new Promise((resolve, reject) => {
     });
 
     req.on('error', err => {
-        reject(`发送 post 请求失败！ 原因: ${err}`);
+        reject(`发送 post 请求失败！ 原因: ${JSON.stringify(err)}`);
     });
     
     req.write(postData);
