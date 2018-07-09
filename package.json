@@ -16,6 +16,8 @@
     "egg-mysql": "^3.0.0",
     "egg-scripts": "^2.6.0",
     "lodash": "^4.17.10",
+    "nodemailer": "^4.6.7",
+    "nodemailer-smtp-transport": "^2.7.4",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {

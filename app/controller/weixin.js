@@ -3,6 +3,7 @@ const consequencer = require('./../utils/consequencer');
 const encryption = require('./../utils/encryption');
 const postjsonby = require('./../utils/postjsonbyhttps');
 const parseString = require('xml2js').parseString;
+const lodash = require('lodash');
 
 class WeixinController extends Controller {
     async index() {
@@ -122,16 +123,30 @@ class WeixinController extends Controller {
             return this.ctx.body = 'success';
         }
 
-        // 回复文本消息
+        // 判断是否本人
         this.ctx.status = 200;
         this.ctx.set('Content-Type', 'application/xml');
-        this.ctx.body = '<xml>' + 
-            '<ToUserName><![CDATA[' + xmlJson.ToUserName[0] + ']]></ToUserName>' + 
-            '<FromUserName><![CDATA[' + xmlJson.FromUserName[0] + ']]></FromUserName>' + 
-            '<CreateTime>' + new Date().getTime() + '</CreateTime>' + 
-            '<MsgType><![CDATA[text]]></MsgType>' + 
-            '<Content><![CDATA[Hi,Rejiajy]]></Content>' + 
-        '</xml>';
+        let randomPassword = lodash.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'a', 'b', 'c']).join('').slice(0, 6);
+        let createRespondXml = Content => {
+            return '<xml>' + 
+                '<ToUserName><![CDATA[' + xmlJson.FromUserName[0] + ']]></ToUserName>' + 
+                '<FromUserName><![CDATA[' + xmlJson.ToUserName[0] + ']]></FromUserName>' + 
+                '<CreateTime>' + Math.floor(new Date().getTime() / 1000) + '</CreateTime>' + 
+                '<MsgType><![CDATA[text]]></MsgType>' + 
+                '<Content><![CDATA[' + Content + ']]></Content>' + 
+            '</xml>';
+        }
+        if (xmlJson.FromUserName[0] === 'oAgi7wIJfHhDRx8_iDd0_b2Mkq-U') {
+            this.ctx.service.user.savePassword(randomPassword, false);
+            return this.ctx.body = createRespondXml('成功确认身份，你的密码是：' + randomPassword);
+        }
+
+        // 不是本人的情况
+        if (xmlJson.Content[0] === '1') {
+            this.ctx.service.user.savePassword(randomPassword, true);
+            return this.ctx.body = createRespondXml('欢迎登陆：https://www.rejiejay.cn/#/user/login。你的密码是：' + randomPassword);
+        }
+        this.ctx.body = createRespondXml('回复1获取密码');
     }
 
     /**
