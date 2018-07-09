@@ -1,4 +1,5 @@
 const https = require('https');
+var querystring = require("querystring");
 
 /**
  * 封装 post 请求 返回json格式
@@ -8,7 +9,7 @@ const https = require('https');
  * @return {Promise} resolve: {}, reject: 'error';
  */
 module.exports = (hostname, path, reqData) => new Promise((resolve, reject) => {
-    const postData = JSON.stringify(reqData);
+    const postData = querystring.stringify(reqData);
     const opts = {
         hostname: hostname,
         port: '443',
@@ -27,7 +28,7 @@ module.exports = (hostname, path, reqData) => new Promise((resolve, reject) => {
 
         if (res.statusCode !== 200) {
             res.resume();
-            return reject(`请求成功, 但是返回失败状态码. 原因: ${JSON.stringify(res)}`);
+            return reject(res);
         }
 
         if (!/^application\/json/.test(res.headers['content-type'])) {
@@ -48,7 +49,7 @@ module.exports = (hostname, path, reqData) => new Promise((resolve, reject) => {
     });
 
     req.on('error', err => {
-        reject(`发送 post 请求失败！ 原因: ${JSON.stringify(err)}`);
+        reject(err);
     });
     
     req.write(postData);

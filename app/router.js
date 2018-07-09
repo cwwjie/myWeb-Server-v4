@@ -15,6 +15,7 @@ module.exports = app => {
     // 微信
     router.get('/weixin', controller.weixin.index); // 测试
     router.get('/weixin/handle', controller.weixin.handle); // 微信验证开发者服务器
+    router.post('/weixin/messagehandle', controller.weixin.messageHandle); // 文本消息
     router.get('/weixin/get/global_access_token', controller.weixin.getGlobalAccess_token); // 获取公众号的全局唯一接口调用凭据
     router.get('/weixin/createMenu', controller.weixin.createMenu); // 创建菜单界面
 };

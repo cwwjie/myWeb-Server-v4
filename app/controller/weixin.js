@@ -55,10 +55,19 @@ class WeixinController extends Controller {
     }
 
     /**
-     * 创建菜单界面
+     * 文本消息
+     * @return {boolen} 是否成功创建
+     */
+    async messageHandle() {
+        return this.ctx.body = this.ctx;
+    }
+
+    /**
+     * 创建菜单界面 (作废 因为公众号 需要通过认证)
      * @return {boolen} 是否成功创建
      */
     async createMenu() {
+        return this.ctx.body = '接口已废弃';
         let myAccessToken = await this.ctx.service.weixin.getGlobalAccess_token();
         
         // 查询失败
@@ -79,11 +88,13 @@ class WeixinController extends Controller {
             myMenu
         ).then(
             success => consequencer.success(success),
-            error => consequencer.error(error)
+            error => consequencer.error(`请求微信服务器出现错误, 原因${error}. 请求myAccessToken: ${myAccessToken.data.value}`, -200, error)
         );
 
         return this.ctx.body = mycreate;
     }
+
+    
 }
 
 module.exports = WeixinController;
