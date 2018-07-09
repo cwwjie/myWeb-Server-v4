@@ -8,7 +8,8 @@ class HomeController extends Controller {
     // return this.ctx.body = global_access_token;
     
     // this.ctx.body = this.config;
-    this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in home';
+    this.ctx.body = this.ctx;
+    // this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in home';
   }
 
   async post() {

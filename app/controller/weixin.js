@@ -2,6 +2,7 @@ const Controller = require('egg').Controller;
 const consequencer = require('./../utils/consequencer');
 const encryption = require('./../utils/encryption');
 const postjsonby = require('./../utils/postjsonbyhttps');
+const parseString = require('xml2js').parseString;
 
 class WeixinController extends Controller {
     async index() {
@@ -59,7 +60,37 @@ class WeixinController extends Controller {
      * @return {boolen} 是否成功创建
      */
     async messageHandle() {
-        return this.ctx.body = this.ctx;
+        const _this = this;
+
+        // 获取 body
+        let xmlJsonResult = await new Promise((resolve, reject) => {
+            let XML = '';
+            _this.ctx.req.on('data', chunk => XML += chunk);
+
+            _this.ctx.req.on('end', () => {
+                try {
+                    // 解析 XML
+                    parseString(decodeURI(XML), (err, result) => {
+                        if (err) {
+                            return reject(`解析xml失败, 原因: ${err}`);
+                        }
+                        resolve(result);
+                    });
+                } catch (error) {
+                    reject(`解析xml失败, 原因: ${error}`);
+                }
+            });
+        })
+        .then(
+            xmlJson => consequencer.success(xmlJson),
+            error => consequencer.error(error)
+        ).catch(error => consequencer.error(error));
+
+        if (xmlJsonResult.result !== 1) {
+            return this.ctx.body = xmlJsonResult;
+        }
+
+        this.ctx.body = xmlJsonResult;
     }
 
     /**
