@@ -57,6 +57,15 @@ class WeixinController extends Controller {
 
     /**
      * 文本消息
+     * @param {xml} xml 
+     * <xml>
+     *   <ToUserName>rejiejay</ToUserName>
+     *   <FromUserName>oI0FV0pK5sqCnE_LBBXb6sxdROwg</FromUserName>
+     *   <CreateTime>1348831860</CreateTime>
+     *   <MsgType>text</MsgType>
+     *   <Content>this is a test</Content>
+     *   <MsgId>1234567890123456</MsgId>
+     * </xml>
      * @return {boolen} 是否成功创建
      */
     async messageHandle() {
@@ -65,6 +74,7 @@ class WeixinController extends Controller {
         // 获取 body
         let xmlJsonResult = await new Promise((resolve, reject) => {
             let XML = '';
+            
             _this.ctx.req.on('data', chunk => XML += chunk);
 
             _this.ctx.req.on('end', () => {
@@ -86,11 +96,43 @@ class WeixinController extends Controller {
             error => consequencer.error(error)
         ).catch(error => consequencer.error(error));
 
+        // 解析 xml
         if (xmlJsonResult.result !== 1) {
+            // {
+            //     "result": 1,
+            //     "data": {
+            //         "xml": {
+            //             "URL": ["https://www.rejiejay.cn/server/weixin/messagehandle"],
+            //             "ToUserName": ["rejiejay"],
+            //             "FromUserName": ["oI0FV0pK5sqCnE_LBBXb6sxdROwg"],
+            //             "CreateTime": ["1348831860"],
+            //             "MsgType": ["text"],
+            //             "Content": ["thisIsATest"],
+            //             "MsgId": ["1234567890123456"]
+            //         }
+            //     },
+            //     "message":"success"
+            // }
             return this.ctx.body = xmlJsonResult;
         }
 
-        this.ctx.body = xmlJsonResult;
+        // 判断是否文本消息
+        let xmlJson = xmlJsonResult.data.xml;
+        if (xmlJson.MsgType[0] !== 'text') {
+            return this.ctx.body = 'success';
+        }
+
+        // 回复文本消息
+        this.ctx.res.writeHead(200, {
+            'Content-Type': 'application/xml;charset=UTF-8'
+        });
+        this.ctx.res.write('<xml>');
+        this.ctx.res.write('<ToUserName>' + xmlJson.ToUserName[0] + '</ToUserName>');
+        this.ctx.res.write('<FromUserName>' + xmlJson.FromUserName[0] + '</FromUserName>');
+        this.ctx.res.write('<CreateTime>' + Date.parse(new Date()) + '</CreateTime>');
+        this.ctx.res.write('<MsgType>text</MsgType>');
+        this.ctx.res.write('<Content>你好,' + xmlJson.FromUserName[0] + '.你的openid为:' + xmlJson.FromUserName[0] + '</Content>');
+        this.ctx.res.end('</xml>');
     }
 
     /**

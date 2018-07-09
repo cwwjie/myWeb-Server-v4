@@ -8,8 +8,18 @@ class HomeController extends Controller {
     // return this.ctx.body = global_access_token;
     
     // this.ctx.body = this.config;
-    this.ctx.body = this.ctx;
-    // this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in home';
+    // this.ctx.res.writeHead(200, {
+    //     'Content-Type': 'application/xml;charset=UTF-8'
+    // });
+    // this.ctx.res.write('<xml>');
+    // this.ctx.res.write('<ToUserName>ToUserName</ToUserName>');
+    // this.ctx.res.write('<FromUserName>FromUserName</FromUserName>');
+    // this.ctx.res.write('<CreateTime>CreateTime</CreateTime>');
+    // this.ctx.res.write('<MsgType>text</MsgType>');
+    // this.ctx.res.write('<Content>你好,rejiejay.你的openid为: 123</Content>');
+    // this.ctx.res.end('</xml>');
+    // this.ctx.body = '<xml><ToUserName>rejiejay</ToUserName><FromUserName>oI0FV0pK5sqCnE_LBBXb6sxdROwg</FromUserName><CreateTime>1348831860</CreateTime><MsgType>text</MsgType><Content>this is a test</Content><MsgId>1234567890123456</MsgId></xml>';
+    this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in home';
   }
 
   async post() {
