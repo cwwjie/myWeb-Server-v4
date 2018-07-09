@@ -123,16 +123,15 @@ class WeixinController extends Controller {
         }
 
         // 回复文本消息
-        this.ctx.res.writeHead(200, {
-            'Content-Type': 'application/xml;charset=UTF-8'
-        });
-        this.ctx.res.write('<xml>');
-        this.ctx.res.write('<ToUserName>' + xmlJson.ToUserName[0] + '</ToUserName>');
-        this.ctx.res.write('<FromUserName>' + xmlJson.FromUserName[0] + '</FromUserName>');
-        this.ctx.res.write('<CreateTime>' + Date.parse(new Date()) + '</CreateTime>');
-        this.ctx.res.write('<MsgType>text</MsgType>');
-        this.ctx.res.write('<Content>你好,' + xmlJson.FromUserName[0] + '.你的openid为:' + xmlJson.FromUserName[0] + '</Content>');
-        this.ctx.res.end('</xml>');
+        this.ctx.status = 200;
+        this.ctx.set('Content-Type', 'application/xml');
+        this.ctx.body = '<xml>' + 
+            '<ToUserName><![CDATA[' + xmlJson.ToUserName[0] + ']]></ToUserName>' + 
+            '<FromUserName><![CDATA[' + xmlJson.FromUserName[0] + ']]></FromUserName>' + 
+            '<CreateTime>' + new Date().getTime() + '</CreateTime>' + 
+            '<MsgType><![CDATA[text]]></MsgType>' + 
+            '<Content><![CDATA[Hi,Rejiajy]]></Content>' + 
+        '</xml>';
     }
 
     /**
