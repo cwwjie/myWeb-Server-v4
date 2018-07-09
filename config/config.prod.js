@@ -17,7 +17,7 @@ module.exports = {
             host: '127.0.0.1',     // host
             port: '3306',          // 端口号
             user: 'Rejiejay',      // 用户名
-            password: 'QQ1938167', // 密码
+            password: 'Qq_1938167_o0O', // 密码
             database: 'rejiejay',  // 数据库名
         },
     },

@@ -66,7 +66,6 @@ class WeixinController extends Controller {
             return this.ctx.body = consequencer.error(`获取access_token失败! 原因: ${myAccessToken.message}`);
         }
 
-
         let myMenu = [
             {
                 'type': 'click',
