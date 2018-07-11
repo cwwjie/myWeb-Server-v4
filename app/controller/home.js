@@ -18,8 +18,9 @@ class HomeController extends Controller {
     // this.ctx.res.write('<Content>你好,rejiejay.你的openid为: 123</Content>');
     // this.ctx.res.end('</xml>');
     // this.ctx.body = '<xml><ToUserName>rejiejay</ToUserName><FromUserName>oI0FV0pK5sqCnE_LBBXb6sxdROwg</FromUserName><CreateTime>1348831860</CreateTime><MsgType>text</MsgType><Content>this is a test</Content><MsgId>1234567890123456</MsgId></xml>';
-    this.ctx.body = await this.ctx.service.user.validatingPassword({a:1}, '9f89c740ceb46d7418c924a78ac57941d5e96520');
+    // this.ctx.body = await this.ctx.service.user.validatingPassword({a:1}, '9f89c740ceb46d7418c924a78ac57941d5e96520');
     // this.ctx.body = ' this.ctx.service.dynamic';
+    this.ctx.body = this.ctx.request;
     // this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in home';
   }
 

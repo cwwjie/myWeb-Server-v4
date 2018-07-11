@@ -112,7 +112,8 @@ class userService extends Service {
      * @param {string} signature cd2c432c30f77dc3d008812010b76d06874771f1
      * @return {boolean} Validating payloads from rejiejay
      */
-    async validatingPassword(payload, signature) {
+    async validatingPayload(payload, signature) {
+
         let myuserlogin = await this.ctx.app.mysql.query("select * from user_login where is_easteregg='false' order by creat_timestamp desc;");
         let myverify = false;
 
