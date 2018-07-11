@@ -1,6 +1,8 @@
 const Service = require('egg').Service;
 const lodash = require('lodash');
 const Mailer = require('./../utils/Mailer');
+const validatingPayloads = require('./../utils/validatingPayloads');
+const consequencer = require('./../utils/consequencer');
 
 class userService extends Service {
     /**
@@ -79,6 +81,36 @@ class userService extends Service {
                 succeed => succeed,
                 MailerError => console.error(`定时任务成功清空密码, 但是无法进行邮件通知${JSON.stringify(MailerError)}`),
             );
+        }
+    }
+
+    /**
+     * 验证密码
+     * @param {object} payload 请求体
+     * @param {string} signature cd2c432c30f77dc3d008812010b76d06874771f1
+     * @return {boolean} Validating payloads from rejiejay
+     */
+    async validatingPassword(payload, signature) {
+        let myuserlogin = await this.ctx.app.mysql.query("select * from user_login where is_easteregg='false' order by creat_timestamp desc;");
+        let myverify = false;
+
+        if (myuserlogin && myuserlogin instanceof Array) {
+            myuserlogin.map(userlogin => {
+                let temp_signature = validatingPayloads(payload, userlogin.user_token);
+
+                if (temp_signature === signature) {
+                    myverify = true;
+                }
+                return userlogin
+            });
+        } else {
+            return consequencer.error('数据库查询出错， 原因无token。');
+        }
+
+        if (myverify) {
+            return consequencer.success();
+        } else {
+            return consequencer.error('验证的参数是错误的。');
         }
     }
 }

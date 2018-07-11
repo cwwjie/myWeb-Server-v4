@@ -357,21 +357,15 @@ const mysha1 = createMethod();
 /**
  * 验证 payload 来自于 rejiejay
  * @param {object} payload 请求体
- * @param {string} signature cd2c432c30f77dc3d008812010b76d06874771f1
- * @return {boolean} Validating payloads from rejiejay
+ * @param {string} token IQHE4A7LpCSuYa9le5kKB2gMoOyPDSf3ctdN6nhV
+ * @return {string} signature cd2c432c30f77dc3d008812010b76d06874771f1
  */
-const validatingPayloads = (payload, signature) => {
-    mysha1('ThisRejiejayEncryptPayloads');
+const validatingPayloads = (payload, token) => {
+    mysha1(token);
     let hash = mysha1.create();
     hash.update(JSON.stringify(payload));
-    console.log(hash.hex())
 
-    if (hash.hex() === signature) {
-        return true
-    } else {
-        return false
-    }
-
+    return hash.hex();
 }
 
 module.exports = validatingPayloads;
