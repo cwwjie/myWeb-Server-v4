@@ -36,4 +36,20 @@ $ npm stop
 - 使用 `npm run autod` 来自动检测依赖更新，详细参见 [autod](https://www.npmjs.com/package/autod) 。
 
 
-[egg]: https://eggjs.org
+### 记录文档
+- 开发环境
+    - app.config.env = local;
+    - this.ctx.app.env = local;
+    - process.env.NODE_ENV = development;
+- 生产环境
+    - app.config.env = prod;
+    - this.ctx.app.env = prod;
+    - process.env.NODE_ENV = production;
+
+- 项目初始化
+    - 删除 logs run package-lock.json 文件夹
+
+- SQL语法
+    - app.mysql.query('update posts set hits = (hits + ?) where id = ?', [1, postId]);
+
+> [egg]: https://eggjs.org

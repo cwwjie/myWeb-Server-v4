@@ -43,6 +43,44 @@ class userService extends Service {
             );
         }
     }
+
+    /**
+     * 清空密码 预留一位
+     */
+    async clearPassword() {
+        // 预留一位
+        let myuserlogin = await this.ctx.app.mysql.query("select * from user_login where is_easteregg='false' and creat_timestamp=(select max(creat_timestamp) from user_login where is_easteregg='false');");
+
+        await this.ctx.app.mysql.query("delete from user_login;");
+
+        // 是否有预留?
+        if (myuserlogin.length === 0) {
+            return Mailer('454766952@qq.com', '定时任务清空密码', '成功清空密码,并且数据库无其他密码.')
+            .then(
+                succeed => succeed,
+                MailerError => console.error(`定时任务成功清空密码, 但是无法进行邮件通知${JSON.stringify(MailerError)}`),
+            );
+        }
+
+        let result = await this.ctx.app.mysql.query('insert into user_login (user_password, user_token, is_easteregg, creat_timestamp) values ( "' + 
+            myuserlogin[0].user_password + '", "' + 
+            myuserlogin[0].user_token + '", "false", "' +
+            myuserlogin[0].creat_timestamp  + '");');
+
+        if (result.warningCount === 0 || result.warningCount === '0') {
+            Mailer('454766952@qq.com', '定时任务清空密码', '成功清空密码,并且预留一位密码.')
+            .then(
+                succeed => succeed,
+                MailerError => console.error(`定时任务成功清空密码, 但是无法进行邮件通知${JSON.stringify(MailerError)}`),
+            );
+        } else {
+            Mailer('454766952@qq.com', '定时任务清空密码', `成功清空密码, 但是预密码出错. 原因: ${result.message}`)
+            .then(
+                succeed => succeed,
+                MailerError => console.error(`定时任务成功清空密码, 但是无法进行邮件通知${JSON.stringify(MailerError)}`),
+            );
+        }
+    }
 }
 
 module.exports = userService;

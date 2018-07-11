@@ -1,7 +1,6 @@
-const path = require('path');
 let nodemailer = require('nodemailer');
 let smtpTransport = require('nodemailer-smtp-transport');
-const config = require(path.relative(__dirname, './config/config.default.js'));
+const config = require('./../../config/config.default.js');
 
 smtpTransport = nodemailer.createTransport(smtpTransport({
     service: config.email.service,
