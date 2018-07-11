@@ -85,6 +85,28 @@ class userService extends Service {
     }
 
     /**
+     * 根据密码查询
+     * @param {string} password 六位数的密码
+     * @return {object} {
+     *   id
+     *   user_password
+     *   user_token
+     *   is_easteregg
+     *   creat_timestamp
+     * }
+     */
+    async gerPassword(password) {
+        let myuserlogin = await this.ctx.app.mysql.query('select * from user_login where user_password="' + password + '";');
+        
+        // 是否查询到数据
+        if (myuserlogin && myuserlogin instanceof Array) {
+            return consequencer.success(myuserlogin[0]);
+        } else {
+            return consequencer.error('密码错误');
+        }
+    }
+
+    /**
      * 验证密码
      * @param {object} payload 请求体
      * @param {string} signature cd2c432c30f77dc3d008812010b76d06874771f1

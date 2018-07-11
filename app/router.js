@@ -13,6 +13,10 @@ module.exports = app => {
     router.get('/record/', controller.record.index); // 测试
     router.post('/record/save', controller.record.save); // 保存一条记录
 
+    // 登录
+    router.get('/user', controller.user.index); // 测试
+    router.get('/user/login', controller.user.login); // 获取登录token
+
     // 微信
     router.get('/weixin', controller.weixin.index); // 测试
     router.get('/weixin/handle', controller.weixin.handle); // 微信验证开发者服务器
