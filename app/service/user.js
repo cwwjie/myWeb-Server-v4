@@ -97,9 +97,9 @@ class userService extends Service {
      */
     async gerPassword(password) {
         let myuserlogin = await this.ctx.app.mysql.query('select * from user_login where user_password="' + password + '";');
-        
+
         // 是否查询到数据
-        if (myuserlogin && myuserlogin instanceof Array) {
+        if (myuserlogin && myuserlogin instanceof Array && myuserlogin.length >= 1) {
             return consequencer.success(myuserlogin[0]);
         } else {
             return consequencer.error('密码错误');
@@ -116,7 +116,7 @@ class userService extends Service {
         let myuserlogin = await this.ctx.app.mysql.query("select * from user_login where is_easteregg='false' order by creat_timestamp desc;");
         let myverify = false;
 
-        if (myuserlogin && myuserlogin instanceof Array) {
+        if (myuserlogin && myuserlogin instanceof Array && myuserlogin.length >= 1) {
             myuserlogin.map(userlogin => {
                 let temp_signature = validatingPayloads(payload, userlogin.user_token);
 
