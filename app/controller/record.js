@@ -38,11 +38,7 @@ class RecordController extends Controller {
       return this.ctx.body = myVerify;
     }
 
-    
-    // if (!validatingPayloads(this.ctx.request.body, this.ctx.request.header['x-rejiejay-signature'])) {
-    //   return this.ctx.body = consequencer.error('验证失败!');
-    // }
-    this.ctx.body = 'Hello';
+    this.ctx.body = await this.ctx.service.record.save(payload.title, payload.content);
   }
 }
 
