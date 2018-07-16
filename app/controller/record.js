@@ -10,6 +10,14 @@ class RecordController extends Controller {
   }
 
   /**
+   * 随机查询一条记录
+   */
+  async getOneByRandom() { 
+    
+    this.ctx.body = await this.ctx.service.record.save(payload.title, payload.content);
+  }
+
+  /**
    * 保存一条记录
    * @param {object} payload {
    *   title: string, 标题

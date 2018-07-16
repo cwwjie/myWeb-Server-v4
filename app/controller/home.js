@@ -19,12 +19,9 @@ class HomeController extends Controller {
     // this.ctx.res.end('</xml>');
     // this.ctx.body = '<xml><ToUserName>rejiejay</ToUserName><FromUserName>oI0FV0pK5sqCnE_LBBXb6sxdROwg</FromUserName><CreateTime>1348831860</CreateTime><MsgType>text</MsgType><Content>this is a test</Content><MsgId>1234567890123456</MsgId></xml>';
     // this.ctx.body = ' this.ctx.service.dynamic';
-    // this.ctx.body = await this.ctx.service.record.save(
-    //   "记录2018-07-12 06:33", 
-    //   '2018-07-122018-07-122018-07-122018-07-12l啦啦啦啦啦啦啊啦啦啦啦啦啦啦啦啦啦啦啦'
-    // );
+    this.ctx.body = await this.ctx.service.record.indexConverter();
     // this.ctx.body = this.ctx.request;
-    this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in home';
+    // this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in home';
   }
 
   async post() {
