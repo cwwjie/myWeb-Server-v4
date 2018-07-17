@@ -6,29 +6,38 @@ class recordService extends Service {
      * 将记录表转换为索引表
      */
     async indexConverter () {
-        let nowYear = new Date().getFullYear();
+        let nowYear = new Date().getFullYear(); // 今年
+        let errorList = [];
 
         // 统计年
         let countYear = await this.ctx.app.mysql.query(`select count(*) from record_list_${nowYear};`);
         let savecountYear = await this.ctx.app.mysql.query(
-            `insert into record_index_${now.getFullYear()} (month_count, week_count, record_amount) values ("0", "0", "${
+            `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("0", "0", "${
                 countYear[0]['count(*)']
             }");`
         );
 
+        if (savecountYear.warningCount !== 0 || savecountYear.message !== '' ) {
+            errorList.push(consequencer.error('统计年失败', 2332, savecountYear));
+        }
+
         for (let i = 1; i <= 12; i++) {
             // 统计月
+            let countMonth = await this.ctx.app.mysql.query(`select count(*) from record_list_${nowYear} where record_month="${i}";`);
+            let savecountMonth = await this.ctx.app.mysql.query(
+                `insert into record_index_${now.getFullYear()} (month_count, week_count, record_amount) values ("${i}", "0", "${
+                    countMonth[0]['count(*)']
+                }");`
+            );
+
+            if (savecountMonth.warningCount !== 0 || savecountMonth.message !== '' ) {
+                errorList.push(consequencer.error('统计年失败', 2332, savecountMonth));
+            }
 
             for (let j = 1; j <= 4; j++) {
                 // 统计周
 
             }
-            await new Promise (resolve => {
-                setTimeout(() => {
-                    console.log(i)
-                    resolve()
-                }, 100)
-            }) 
         }
         
         return savecountYear
