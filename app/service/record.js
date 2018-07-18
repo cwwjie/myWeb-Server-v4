@@ -9,38 +9,55 @@ class recordService extends Service {
         let nowYear = new Date().getFullYear(); // 今年
         let errorList = [];
 
+        // 清空
+        await this.ctx.app.mysql.query(`delete from record_index_${nowYear};`);
+
         // 统计年
         let countYear = await this.ctx.app.mysql.query(`select count(*) from record_list_${nowYear};`);
-        let savecountYear = await this.ctx.app.mysql.query(
+        let saveCountYear = await this.ctx.app.mysql.query(
             `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("0", "0", "${
                 countYear[0]['count(*)']
             }");`
         );
 
-        if (savecountYear.warningCount !== 0 || savecountYear.message !== '' ) {
-            errorList.push(consequencer.error('统计年失败', 2332, savecountYear));
+        if (saveCountYear.warningCount !== 0 || saveCountYear.message !== '' ) {
+            errorList.push(consequencer.error('统计一年所有失败', 2332, saveCountYear));
         }
 
         for (let i = 1; i <= 12; i++) {
             // 统计月
             let countMonth = await this.ctx.app.mysql.query(`select count(*) from record_list_${nowYear} where record_month="${i}";`);
-            let savecountMonth = await this.ctx.app.mysql.query(
-                `insert into record_index_${now.getFullYear()} (month_count, week_count, record_amount) values ("${i}", "0", "${
+            let saveCountMonth = await this.ctx.app.mysql.query(
+                `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("${i}", "0", "${
                     countMonth[0]['count(*)']
                 }");`
-            );
+            );  
 
-            if (savecountMonth.warningCount !== 0 || savecountMonth.message !== '' ) {
-                errorList.push(consequencer.error('统计年失败', 2332, savecountMonth));
+            if (saveCountMonth.warningCount !== 0 || saveCountMonth.message !== '' ) {
+                errorList.push(consequencer.error(`统计${i}月的记录数据失败`, 2332, saveCountMonth));
             }
 
             for (let j = 1; j <= 4; j++) {
                 // 统计周
+                let countWeek = await this.ctx.app.mysql.query(`select count(*) from record_list_${nowYear} where record_month="${i}" and record_week
+                ="${j}";`);
+                let saveCountWeek = await this.ctx.app.mysql.query(
+                    `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("${i}", "${j}", "${
+                        countWeek[0]['count(*)']
+                    }");`
+                );
 
+                if (saveCountWeek.warningCount !== 0 || saveCountWeek.message !== '' ) {
+                    errorList.push(consequencer.error(`统计${i}月的第${j}周的记录数据失败`, 2332, saveCountWeek));
+                }
             }
         }
-        
-        return savecountYear
+
+        if (errorList.length === 0) {
+            return consequencer.success();
+        } else {
+            return consequencer.error('统计数据出现错误!', 3223, errorList)
+        }
     }
     /**
      * 存储记录
