@@ -95,7 +95,7 @@ class userService extends Service {
      *   creat_timestamp
      * }
      */
-    async gerPassword(password) {
+    async getPassword(password) {
         let myuserlogin = await this.ctx.app.mysql.query('select * from user_login where user_password="' + password + '";');
 
         // 是否查询到数据

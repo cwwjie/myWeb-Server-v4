@@ -15,7 +15,7 @@ class UserController extends Controller {
             return this.ctx.body = consequencer.error('参数错误');
         }
 
-        let myUserToken = await this.ctx.service.user.gerPassword(this.ctx.query.password);
+        let myUserToken = await this.ctx.service.user.getPassword(this.ctx.query.password);
 
          // 查询失败
          if (myUserToken.result !== 1) {

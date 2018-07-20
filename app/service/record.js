@@ -121,6 +121,14 @@ class recordService extends Service {
     async insertTestData () {
         
     }    
+
+    /**
+     * 存储记录
+     * @return {object} 
+     */
+    async insertTestData () {
+        
+    }    
 }
 
 module.exports = recordService;
