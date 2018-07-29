@@ -142,6 +142,11 @@ class recordService extends Service {
         // 统计一共有多少数据
         for (let thisYear = 2018; thisYear <= new Date().getFullYear(); thisYear++) {
             let countYear = await this.ctx.app.mysql.query(`select record_amount from record_index_${thisYear} where month_count="0" and week_count="0";`);
+
+            if (countYear.length === 0) { // 如果出现这种情况表示未进行统计
+                await this.ctx.service.record.indexConverter(); // 统计一次
+                countYear = await this.ctx.app.mysql.query(`select record_amount from record_index_${thisYear} where month_count="0" and week_count="0";`); // 再次获取统计过后的数据
+            }
             countAmount += countYear[0]['count(*)'];
             indexArray.push({
                 year: thisYear,

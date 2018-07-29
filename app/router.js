@@ -11,6 +11,7 @@ module.exports = app => {
 
     // 记录
     router.get('/record/', controller.record.index); // 测试
+    router.get('/record/get/one', controller.record.getOneByRandom); // 随机查询一条记录
     router.post('/record/save', controller.record.save); // 保存一条记录
 
     // 登录
