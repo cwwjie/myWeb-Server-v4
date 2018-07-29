@@ -114,9 +114,8 @@ class recordService extends Service {
             saveRecord.warningCount === 0 &&
             saveRecord.message === ""
         ) {
-            
             return consequencer.success({
-                id: saveRecord.data.insertId,
+                id: saveRecord.insertId,
                 title: title,
                 content: content
             });
