@@ -112,7 +112,19 @@ class userService extends Service {
      * @param {string} signature cd2c432c30f77dc3d008812010b76d06874771f1
      * @return {boolean} Validating payloads from rejiejay
      */
-    async validatingPayload(payload, signature) {
+    async validatingPayload() {
+        const payload = this.ctx.request.body;
+        const signature = this.ctx.request.header['x-rejiejay-signature'];
+    
+        // 判断请求格式
+        if (this.ctx.request.header["content-type"] !== "application/json") {
+          return this.ctx.body = consequencer.error('content-type is not application/json');
+        }
+        
+        // 签名是否为空
+        if (!signature) {
+          return this.ctx.body = consequencer.error('signature is error');
+        }
 
         let myuserlogin = await this.ctx.app.mysql.query("select * from user_login where is_easteregg='false' order by creat_timestamp desc;");
         let myverify = false;

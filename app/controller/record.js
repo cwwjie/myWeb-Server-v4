@@ -25,22 +25,14 @@ class RecordController extends Controller {
    */
   async save() { 
     const payload = this.ctx.request.body;
-    const signature = this.ctx.request.header['x-rejiejay-signature'];
 
-    if (this.ctx.request.header["content-type"] !== "application/json") {
-      return this.ctx.body = consequencer.error('content-type is not application/json');
-    }
-
-    if (!signature) {
-      return this.ctx.body = consequencer.error('signature is error');
-    }
-
+    // 判断一些必填项目
     if (!payload || !payload.title || !payload.content || typeof payload.title !== 'string' || typeof payload.content !== 'string') {
       return this.ctx.body = consequencer.error('payload is error');
     }
 
-    let myVerify = await this.ctx.service.user.validatingPayload(payload, signature);
-
+    // 验证请求
+    let myVerify = await this.ctx.service.user.validatingPayload();
     if (myVerify.result !== 1) {
       return this.ctx.body = myVerify;
     }
