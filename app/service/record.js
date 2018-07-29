@@ -65,7 +65,11 @@ class recordService extends Service {
      * 存储记录
      * @param {string} title 标题
      * @param {string} content 内容
-     * @return {object} 
+     * @return {object} {
+     *   id: 0,
+     *   title: '',
+     *   content: '',
+     * }
      */
     async save(title, content) {
         let now = new Date();
@@ -85,6 +89,7 @@ class recordService extends Service {
             }
         }
 
+        let nowTime = now.getTime();
         let saveRecord = await this.ctx.app.mysql.query(
             `insert into record_list_${now.getFullYear()} (record_month, record_week, record_day, record_data, timestamp, title, content) values ("${
                 now.getMonth() + 1   
@@ -95,7 +100,7 @@ class recordService extends Service {
             }", "${
                 myDate
             }", "${
-                now.getTime()
+                nowTime
             }", "${
                 title
             }", "${
@@ -103,13 +108,18 @@ class recordService extends Service {
             }");`
         );
 
-        // 是否查询到数据
+        // 是否查询到数据 
         if (
             saveRecord && 
             saveRecord.warningCount === 0 &&
             saveRecord.message === ""
         ) {
-            return consequencer.success();
+            
+            return consequencer.success({
+                id: saveRecord.data.insertId,
+                title: title,
+                content: content
+            });
         } else {
             return consequencer.error(`数据库保存失败, 原因: ${saveRecord.message}.`);
         }
