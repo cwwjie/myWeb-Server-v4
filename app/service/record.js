@@ -1,9 +1,11 @@
 const Service = require('egg').Service;
 const consequencer = require('./../utils/consequencer');
+const convertNumber = require('./../utils/convertNumber');
 
 class recordService extends Service {
     /**
      * 将记录表转换为索引表
+     * @return {object} consequencer
      */
     async indexConverter () {
         let nowYear = new Date().getFullYear(); // 今年
@@ -123,12 +125,54 @@ class recordService extends Service {
     }    
 
     /**
-     * 存储记录
-     * @return {object} 
+     * 随机查询一条记录
+     * @return {object} consequencer
      */
-    async insertTestData () {
-        
-    }    
+    async getOne() {
+        let countAmount = 0; // 一共多少条数据
+        let indexArray = [ // 每个年份对应数据的下标
+            // {
+            //     year: 2018, // 对应年份
+            //     countStart: 0, // 统计之前的数据
+            //     countEnd: 1,   // 统计过后的数据
+            // }
+        ];
+
+        let countStart = 1; // 统计之前的数据
+        // 统计一共有多少数据
+        for (let thisYear = 2018; thisYear <= new Date().getFullYear(); thisYear++) {
+            let countYear = await this.ctx.app.mysql.query(`select record_amount from record_index_${thisYear} where month_count="0" and week_count="0";`);
+            countAmount += countYear[0]['count(*)'];
+            indexArray.push({
+                year: thisYear,
+                countStart: countStart,
+                countEnd: countAmount,
+            });
+
+            // 进入下一个循环
+            countStart = countAmount;
+        }
+
+        // 随机数, 用于判断在哪个年份
+        let randomIndex = convertNumber.creatRandomBy(1, countAmount === 0 ? 1 : countAmount);
+        let targetYear = 2018; // 查询的年份(随机生成)
+        for (let i = 0; i < indexArray.length; i++) {
+            if (
+                randomIndex > indexArray[i].countStart &&
+                randomIndex <= indexArray[i].countEnd
+            ) {
+                targetYear = indexArray[i].year;
+            }
+        }
+
+        let record = await this.ctx.app.mysql.query(`SELECT * FROM record_list_${targetYear} AS t1 JOIN (SELECT ROUND(RAND() * ((SELECT MAX(id) FROM record_list_${targetYear})-(SELECT MIN(id) FROM record_list_${targetYear}))+(SELECT MIN(id) FROM record_list_${targetYear})) AS id) AS t2 WHERE t1.id >= t2.id ORDER BY t1.id LIMIT 1;`);
+
+        if (record.length > 0) { // 成功
+            return consequencer.success(record[0]);
+        } else {
+            return consequencer.error('数据为空')
+        }
+    }
 }
 
 module.exports = recordService;

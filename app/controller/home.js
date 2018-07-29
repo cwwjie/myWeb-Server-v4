@@ -3,25 +3,11 @@ const Controller = require('egg').Controller;
 class HomeController extends Controller {
   async index() {
     // let global_access_token = await this.ctx.app.mysql.query("update weixin set value='',expire_timestamp='' where  my_key='global_access_token';");
-    // let global_access_token = await this.ctx.app.mysql.query("update weixin set value='11_Hi0KxrnvVN_RP47QqLd6_lkV8EAgKSLG_CL28rFgJd4eMaVc0g4jEOIgZ_BulbYXvKcGUTVfN6aaQHpY-xNxiTPO7c5xU_Yj7nRS7bpRtYPsT1K61xG2haGyAcgFzDl9KfCGmKBJyK9SKX8wYBMbAEAGJU',expire_timestamp='1' where  my_key='global_access_token';");
-    // return this.ctx.body = global_access_token;
-    
-    // this.ctx.body = this.config;
-    // this.ctx.res.writeHead(200, {
-    //     'Content-Type': 'application/xml;charset=UTF-8'
-    // });
-    // this.ctx.res.write('<xml>');
-    // this.ctx.res.write('<ToUserName>ToUserName</ToUserName>');
-    // this.ctx.res.write('<FromUserName>FromUserName</FromUserName>');
-    // this.ctx.res.write('<CreateTime>CreateTime</CreateTime>');
-    // this.ctx.res.write('<MsgType>text</MsgType>');
-    // this.ctx.res.write('<Content>你好,rejiejay.你的openid为: 123</Content>');
-    // this.ctx.res.end('</xml>');
-    // this.ctx.body = '<xml><ToUserName>rejiejay</ToUserName><FromUserName>oI0FV0pK5sqCnE_LBBXb6sxdROwg</FromUserName><CreateTime>1348831860</CreateTime><MsgType>text</MsgType><Content>this is a test</Content><MsgId>1234567890123456</MsgId></xml>';
-    // this.ctx.body = ' this.ctx.service.dynamic';
-    this.ctx.body = await this.ctx.service.record.indexConverter();
-    // this.ctx.body = this.ctx.request;
+    // this.ctx.body = await this.ctx.service.record.indexConverter();
     // this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in home';
+    let targetYear = 2018;
+    let record = await this.ctx.app.mysql.query(`SELECT * FROM record_list_${targetYear} AS t1 JOIN (SELECT ROUND(RAND() * ((SELECT MAX(id) FROM record_list_${targetYear})-(SELECT MIN(id) FROM record_list_${targetYear}))+(SELECT MIN(id) FROM record_list_${targetYear})) AS id) AS t2 WHERE t1.id >= t2.id ORDER BY t1.id LIMIT 1;`);
+    this.ctx.body = record;
   }
 
   async post() {
