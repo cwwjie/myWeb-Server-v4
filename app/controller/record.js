@@ -39,6 +39,38 @@ class RecordController extends Controller {
 
     this.ctx.body = await this.ctx.service.record.save(payload.title, payload.content);
   }
+
+  /**
+   * 保存一条记录
+   * @param {object} payload {
+   *   title: string, 标题
+   *   content: string, 内容
+   * }
+   */
+  async edit() { 
+    const payload = this.ctx.request.body;
+
+    // 判断一些必填项目
+    if (
+      !payload || 
+      !payload.id || 
+      !payload.title || 
+      !payload.content || 
+      typeof payload.id !== 'number' || 
+      typeof payload.title !== 'string' || 
+      typeof payload.content !== 'string'
+    ) {
+      return this.ctx.body = consequencer.error('payload is error');
+    }
+
+    // 验证请求
+    let myVerify = await this.ctx.service.user.validatingPayload();
+    if (myVerify.result !== 1) {
+      return this.ctx.body = myVerify;
+    }
+
+    this.ctx.body = await this.ctx.service.record.edit(payload.id, payload.title, payload.content);
+  }
 }
 
 module.exports = RecordController;

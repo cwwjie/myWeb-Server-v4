@@ -124,12 +124,17 @@ class recordService extends Service {
         }
     }
     /**
-     * 存储记录
+     * 编辑记录
+     * @param {number} id 唯一标识
      * @param {string} title 标题
      * @param {string} content 内容
      * @return {object} 
      */
-    async insertTestData () {
+    async edit (id, title, content) {
+        let now = new Date();
+        let saveRecord = await this.ctx.app.mysql.query(
+            `select * from record_list_${now.getFullYear()} (record_month, record_week, record_day, record_data, timestamp, title, content) values ("");`
+        );
         
     }    
 
@@ -182,7 +187,12 @@ class recordService extends Service {
         let record = await this.ctx.app.mysql.query(`SELECT * FROM record_list_${targetYear} AS t1 JOIN (SELECT ROUND(RAND() * ((SELECT MAX(id) FROM record_list_${targetYear})-(SELECT MIN(id) FROM record_list_${targetYear}))+(SELECT MIN(id) FROM record_list_${targetYear})) AS id) AS t2 WHERE t1.id >= t2.id ORDER BY t1.id LIMIT 1;`);
 
         if (record.length > 0) { // 成功
-            return consequencer.success(record[0]);
+            return consequencer.success({
+                id: record[0].id,
+                year: targetYear,
+                title: record[0].title,
+                content: record[0].content,
+            });
         } else {
             return consequencer.error('数据为空')
         }
