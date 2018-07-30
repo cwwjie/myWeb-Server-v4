@@ -126,16 +126,34 @@ class recordService extends Service {
     /**
      * 编辑记录
      * @param {number} id 唯一标识
+     * @param {number} year 年份
      * @param {string} title 标题
      * @param {string} content 内容
      * @return {object} 
      */
-    async edit (id, title, content) {
-        let now = new Date();
-        let saveRecord = await this.ctx.app.mysql.query(
-            `select * from record_list_${now.getFullYear()} (record_month, record_week, record_day, record_data, timestamp, title, content) values ("");`
+    async edit (id, year, title, content) {
+        let checkRecord = await this.ctx.app.mysql.query(`select * from record_list_${year} where id="${id}" ;`);
+        if (checkRecord instanceof Array === false || checkRecord.length === 0) {
+            return consequencer.error('数据有误');
+        }
+        let updateRecord = await this.ctx.app.mysql.query(
+            `update record_list_${year} set title="${title}",content="${content}" where id="${id}";`
         );
-        
+
+        // 是否保存成功? 
+        if (
+            updateRecord && 
+            updateRecord.warningCount === 0
+        ) {
+            return consequencer.success({
+                id: id,
+                year: year,
+                title: title,
+                content: content
+            });
+        } else {
+            return consequencer.error(`数据库修改失败, 原因: ${updateRecord.message}.`);
+        }
     }    
 
     /**

@@ -54,9 +54,11 @@ class RecordController extends Controller {
     if (
       !payload || 
       !payload.id || 
+      !payload.year || 
       !payload.title || 
       !payload.content || 
       typeof payload.id !== 'number' || 
+      typeof payload.year !== 'number' || 
       typeof payload.title !== 'string' || 
       typeof payload.content !== 'string'
     ) {
@@ -69,7 +71,7 @@ class RecordController extends Controller {
       return this.ctx.body = myVerify;
     }
 
-    this.ctx.body = await this.ctx.service.record.edit(payload.id, payload.title, payload.content);
+    this.ctx.body = await this.ctx.service.record.edit(payload.id, payload.year, payload.title, payload.content);
   }
 }
 
