@@ -115,7 +115,7 @@ class userService extends Service {
     async validatingPayload() {
         const payload = this.ctx.request.body;
         const signature = this.ctx.request.header['x-rejiejay-signature'];
-    
+
         // 判断请求格式
         if (this.ctx.request.header["content-type"] !== "application/json") {
           return this.ctx.body = consequencer.error('content-type is not application/json');
@@ -145,7 +145,7 @@ class userService extends Service {
         if (myverify) {
             return consequencer.success();
         } else {
-            return consequencer.error('验证的参数是错误的。');
+            return consequencer.error('验证的参数是错误的。', 110);
         }
     }
 }
