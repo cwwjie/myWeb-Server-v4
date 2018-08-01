@@ -73,6 +73,36 @@ class RecordController extends Controller {
 
     this.ctx.body = await this.ctx.service.record.edit(payload.id, payload.year, payload.title, payload.content);
   }
+
+  /**
+   * 删除一条记录
+   * @param {object} payload {
+   *   title: string, 标题
+   *   content: string, 内容
+   * }
+   */
+  async delete() { 
+    const payload = this.ctx.request.body;
+
+    // 判断一些必填项目
+    if (
+      !payload || 
+      !payload.id || 
+      !payload.year || 
+      typeof payload.id !== 'number' || 
+      typeof payload.year !== 'number'
+    ) {
+      return this.ctx.body = consequencer.error('payload is error');
+    }
+
+    // 验证请求
+    let myVerify = await this.ctx.service.user.validatingPayload();
+    if (myVerify.result !== 1) {
+      return this.ctx.body = myVerify;
+    }
+
+    this.ctx.body = await this.ctx.service.record.delete(payload.id, payload.year);
+  }
 }
 
 module.exports = RecordController;

@@ -131,7 +131,7 @@ class recordService extends Service {
      * @param {string} content 内容
      * @return {object} 
      */
-    async edit (id, year, title, content) {
+    async edit(id, year, title, content) {
         let checkRecord = await this.ctx.app.mysql.query(`select * from record_list_${year} where id="${id}" ;`);
         if (checkRecord instanceof Array === false || checkRecord.length === 0) {
             return consequencer.error('数据有误');
@@ -153,6 +153,31 @@ class recordService extends Service {
             });
         } else {
             return consequencer.error(`数据库修改失败, 原因: ${updateRecord.message}.`);
+        }
+    }    
+    /**
+     * 删除记录
+     * @param {number} id 唯一标识
+     * @param {number} year 年份
+     * @return {object} 
+     */
+    async delete(id, year) {
+        let checkRecord = await this.ctx.app.mysql.query(`select * from record_list_${year} where id="${id}" ;`);
+        if (checkRecord instanceof Array === false || checkRecord.length === 0) {
+            return consequencer.error('数据有误');
+        }
+        let deleteRecord = await this.ctx.app.mysql.query(
+            `delete from record_list_${year} where id="${id}";`
+        );
+
+        // 是否删除成功? 
+        if (
+            deleteRecord && 
+            deleteRecord.warningCount === 0
+        ) {
+            return consequencer.success();
+        } else {
+            return consequencer.error(`删除数据修改失败, 原因: ${deleteRecord.message}.`);
         }
     }    
 
@@ -201,8 +226,8 @@ class recordService extends Service {
                 targetYear = indexArray[i].year;
             }
         }
-
-        let record = await this.ctx.app.mysql.query(`SELECT * FROM record_list_${targetYear} AS t1 JOIN (SELECT ROUND(RAND() * ((SELECT MAX(id) FROM record_list_${targetYear})-(SELECT MIN(id) FROM record_list_${targetYear}))+(SELECT MIN(id) FROM record_list_${targetYear})) AS id) AS t2 WHERE t1.id >= t2.id ORDER BY t1.id LIMIT 1;`);
+        
+        let record = await this.ctx.app.mysql.query(`select  *  from  record_list_${targetYear} order by rand() limit 1`);
 
         if (record.length > 0) { // 成功
             return consequencer.success({

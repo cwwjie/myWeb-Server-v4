@@ -14,6 +14,7 @@ module.exports = app => {
     router.get('/record/get/one', controller.record.getOneByRandom); // 随机查询一条记录
     router.post('/record/save', controller.record.save); // 保存一条记录
     router.post('/record/edit', controller.record.edit); // 编辑一条记录
+    router.post('/record/delete', controller.record.delete); // 删除一条记录
 
     // 登录
     router.get('/user', controller.user.index); // 测试
