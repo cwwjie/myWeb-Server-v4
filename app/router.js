@@ -16,6 +16,10 @@ module.exports = app => {
     router.post('/record/edit', controller.record.edit); // 编辑一条记录
     router.post('/record/delete', controller.record.delete); // 删除一条记录
 
+    // 英语
+    router.get('/english/', controller.english.index); // 提供 路由 测试
+    router.get('/english/get/list', controller.english.getListBy); // 根据页码查询记录
+
     // 登录
     router.get('/user', controller.user.index); // 测试
     router.get('/user/login', controller.user.login); // 获取登录token
