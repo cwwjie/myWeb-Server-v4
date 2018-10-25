@@ -19,6 +19,7 @@ module.exports = app => {
     // 英语
     router.get('/english/', controller.english.index); // 提供 路由 测试
     router.get('/english/get/list', controller.english.getListBy); // 根据页码查询记录
+    router.post('/english/add', controller.english.add); // 新增一条记录
 
     // 登录
     router.get('/user', controller.user.index); // 测试

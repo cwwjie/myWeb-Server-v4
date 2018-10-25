@@ -61,6 +61,7 @@ class recordService extends Service {
             return consequencer.error('统计数据出现错误!', 3223, errorList)
         }
     }
+    
     /**
      * 存储记录
      * @param {string} title 标题

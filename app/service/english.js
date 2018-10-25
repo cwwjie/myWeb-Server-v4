@@ -24,6 +24,33 @@ class HomeController extends Controller {
          */
         return await this.ctx.app.mysql.query(`select * from english order by creat_timestamp desc LIMIT ${num ? num : 0}, 10;`);
     }
+
+    /**
+     * 存储记录
+     * @param {string} en_text 英文
+     * @param {string} zh_text 中文
+     * @return {object} 
+     */
+    async save(en_text, zh_text) {
+        /**
+         * 初始化时间
+         */
+        let creat_timestamp  = new Date().getTime();
+
+        /**
+         * 插入到MySQL
+         */
+        let saveRecord = await this.ctx.app.mysql.query(`insert into english (en_text, zh_text, creat_timestamp) values ("${en_text}", "${zh_text}", "${creat_timestamp}")`);
+
+        /**
+         * 判断是否插入成功
+         */
+        if (saveRecord && saveRecord.warningCount === 0 && saveRecord.message === "") {
+            return consequencer.success();
+        } else {
+            return consequencer.error(`数据库保存失败, 原因: ${saveRecord.message}.`);
+        }
+    }
 }
 
 module.exports = HomeController;

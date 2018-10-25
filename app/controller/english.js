@@ -29,6 +29,35 @@ class HomeController extends Controller {
             list: result,
         });
     }
+
+    /**
+     * 新增一条数据
+     * @param {string} en_text 英文
+     * @param {string} zh_text 中文
+     */
+    async add() {
+        const payload = this.ctx.request.body;
+
+        /**
+         * 判断参数
+         */
+        if (!payload || !payload.en_text || !payload.zh_text || typeof payload.en_text !== 'string' || typeof payload.zh_text !== 'string') {
+            return this.ctx.body = consequencer.error('payload is error');
+        }
+
+        /**
+         * 验证权限(是否登录)
+         */
+        let myVerify = await this.ctx.service.user.validatingPayload();
+        if (myVerify.result !== 1) {
+          return this.ctx.body = myVerify;
+        }
+
+        /**
+         * 执行数据插入
+         */
+        this.ctx.body = await this.ctx.service.english.save(payload.en_text, payload.zh_text);
+    }
 }
 
 module.exports = HomeController;
