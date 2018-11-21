@@ -4,6 +4,30 @@ const convertNumber = require('./../utils/convertNumber');
 
 class recordService extends Service {
     /**
+     * 一共多少条记录
+     */
+    async countall() {
+        let count = await this.ctx.app.mysql.query('select count(*) from record_list_2018;');
+
+        // 是否查询到数据
+        if (count && count instanceof Array && count[0]['count(*)'] > 0) {
+            return count[0]['count(*)'];
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * 根据页码查询多少条记录
+     */
+    async getByPageNum(num) {
+        /**
+         * LIMIT 第一个数 是从几开始查 第二个是代表查多少个 
+         */
+        return await this.ctx.app.mysql.query(`select * from record_list_2018 order by timestamp desc LIMIT ${num ? (num * 10) : 0}, 10;`);
+    }
+
+    /**
      * 将记录表转换为索引表
      * @return {object} consequencer
      */
@@ -124,6 +148,7 @@ class recordService extends Service {
             return consequencer.error(`数据库保存失败, 原因: ${saveRecord.message}.`);
         }
     }
+    
     /**
      * 编辑记录
      * @param {number} id 唯一标识
@@ -138,7 +163,7 @@ class recordService extends Service {
             return consequencer.error('数据有误');
         }
         let updateRecord = await this.ctx.app.mysql.query(
-            `update record_list_${year} set title="${title}",content="${content}" where id="${id}";`
+            `update record_list_${year} set title="${title}",content="${content}",timestamp="${new Date().getTime()}" where id="${id}";`
         );
 
         // 是否保存成功? 

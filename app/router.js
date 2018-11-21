@@ -12,14 +12,18 @@ module.exports = app => {
     // 记录
     router.get('/record/', controller.record.index); // 测试
     router.get('/record/get/one', controller.record.getOneByRandom); // 随机查询一条记录
+    router.get('/record/get/list', controller.record.getListBy); // 根据页码查询记录
     router.post('/record/save', controller.record.save); // 保存一条记录
     router.post('/record/edit', controller.record.edit); // 编辑一条记录
     router.post('/record/delete', controller.record.delete); // 删除一条记录
-
+    
     // 英语
     router.get('/english/', controller.english.index); // 提供 路由 测试
     router.get('/english/get/list', controller.english.getListBy); // 根据页码查询记录
+    router.get('/english/get/random', controller.english.getByRandom); // 随机查询17条数据
     router.post('/english/add', controller.english.add); // 新增一条记录
+    router.post('/english/edit', controller.english.edit); // 编辑一条记录
+    router.post('/english/del', controller.english.del); // 删除一条记录
 
     // 登录
     router.get('/user', controller.user.index); // 测试
@@ -31,4 +35,8 @@ module.exports = app => {
     router.post('/weixin/handle', controller.weixin.messageHandle); // 文本消息
     router.get('/weixin/get/global_access_token', controller.weixin.getGlobalAccess_token); // 获取公众号的全局唯一接口调用凭据
     router.get('/weixin/createMenu', controller.weixin.createMenu); // 创建菜单界面
+
+    // 百度
+    router.get('/baidu', controller.baidu.index); // 测试
+    router.get('/baidu/text2audio/token', controller.baidu.getText2audioAccessToken); // 获取 百度音频的应用程序编程接口凭证
 };

@@ -1,4 +1,7 @@
+// 框架
 const Controller = require('egg').Controller;
+// 组件
+const consequencer = require('./../utils/consequencer');
 
 class HomeController extends Controller {
     /**
@@ -22,7 +25,14 @@ class HomeController extends Controller {
         /**
          * LIMIT 第一个数 是从几开始查 第二个是代表查多少个 
          */
-        return await this.ctx.app.mysql.query(`select * from english order by creat_timestamp desc LIMIT ${num ? num : 0}, 10;`);
+        return await this.ctx.app.mysql.query(`select * from english order by creat_timestamp desc LIMIT ${num ? (num * 10) : 0}, 10;`);
+    }
+
+    /**
+     * 随机查询16条记录
+     */
+    async getByRandom() {
+        return await this.ctx.app.mysql.query('select * from english order by rand() limit 16;');
     }
 
     /**
@@ -49,6 +59,58 @@ class HomeController extends Controller {
             return consequencer.success();
         } else {
             return consequencer.error(`数据库保存失败, 原因: ${saveRecord.message}.`);
+        }
+    }
+
+    /**
+     * 编辑记录
+     * @param {string} id 唯一标识
+     * @param {string} en_text 英文
+     * @param {string} zh_text 中文
+     * @return {object} 
+     */
+    async edit(id, en_text, zh_text) {
+        /**
+         * 判断是否有这条数据
+         */
+        let checkRecord = await this.ctx.app.mysql.query(`select * from english where id="${id}" ;`);
+        if (checkRecord instanceof Array === false || checkRecord.length === 0) {
+            return consequencer.error('数据有误');
+        }
+
+        /**
+         * 修改记录
+         */
+        let updateRecord = await this.ctx.app.mysql.query(`update english set en_text="${en_text}",zh_text="${zh_text}" where id="${id}";`);
+        if (updateRecord && updateRecord.warningCount === 0) {
+            return consequencer.success();
+        }  else {
+            return consequencer.error(`数据库修改失败, 原因: ${updateRecord.message}.`);
+        }
+    }
+
+    /**
+     * 删除记录
+     * @param {string} id 唯一标识
+     * @return {object} 
+     */
+    async del(id) {
+        /**
+         * 判断是否有这条数据
+         */
+        let checkRecord = await this.ctx.app.mysql.query(`select * from english where id="${id}" ;`);
+        if (checkRecord instanceof Array === false || checkRecord.length === 0) {
+            return consequencer.error('数据有误');
+        }
+
+        /**
+         * 删除记录
+         */
+        let deleteRecord = await this.ctx.app.mysql.query(`delete from english where id="${id}";`);
+        if (deleteRecord && deleteRecord.warningCount === 0) {
+            return consequencer.success();
+        }  else {
+            return consequencer.error(`数据库修改失败, 原因: ${deleteRecord.message}.`);
         }
     }
 }

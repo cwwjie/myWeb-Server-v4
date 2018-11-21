@@ -145,7 +145,7 @@ class userService extends Service {
         if (myverify) {
             return consequencer.success();
         } else {
-            return consequencer.error('验证的参数是错误的。', 110);
+            return consequencer.error('签名错误', 110);
         }
     }
 }
