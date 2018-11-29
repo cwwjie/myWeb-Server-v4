@@ -88,7 +88,7 @@ class baiduService extends Service {
         /**
          * 判断是否保存到数据库
          */
-        if (updateAccesstoken && updateAccesstoken.warningCount === 0 && updateAccesstoken.message === "") {
+        if (updateAccesstoken && updateAccesstoken.warningCount === 0) {
             return consequencer.success(awaitAccesstoken.data.access_token);
         } else {
             return consequencer.error(`向百度 请求 access_token 成功， 但是数据库SQL保存失败, 原因: ${updateAccesstoken.message}.`);

@@ -24,6 +24,6 @@ module.exports = {
     },
 
     security: { // 跨域请求
-        domainWhiteList: [ 'http://localhost:8000', 'http://localhost:3000', 'http://localhost' ],
+        domainWhiteList: [ 'http://localhost:8000', 'http://localhost:3000', 'http://localhost:4200', 'http://localhost' ],
     }
 };
