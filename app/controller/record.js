@@ -19,8 +19,9 @@ class RecordController extends Controller {
      * 根据Id 查询一条记录
      */
     async getOneById() {
+        
         // 判断 是否存在 id 并且是否合法
-        if (!this.ctx.request.query || !this.ctx.request.query.id || typeof this.ctx.request.query.id !== 'number') {
+        if (!this.ctx.request.query || !this.ctx.request.query.id || !/^\d+$/.test(this.ctx.request.query.id) /** 这个正则是判断整数 */) {
             return this.ctx.body = consequencer.error('id is error');
         }
 
