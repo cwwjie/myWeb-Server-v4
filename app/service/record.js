@@ -28,7 +28,24 @@ class recordService extends Service {
     }
 
     /**
-     * 将记录表转换为索引表
+     * 根据Id 查询一条记录
+     * @param {number || string} id 记录的唯一 id （此 id 默认是正确的不进行 校验）
+     */
+    async getOneById(id) {
+        let checkRecord = await this.ctx.app.mysql.query(`select * from record_list_2018 where id="${id}" ;`);
+        if (checkRecord instanceof Array === false || checkRecord.length === 0) {
+            return consequencer.error('无此 id 记录');
+        }
+        
+        return consequencer.success({
+            id: checkRecord[0].id,
+            title: checkRecord[0].title,
+            content: checkRecord[0].content,
+        });
+    }
+
+    /**
+     * 将记录表转换为索引表 ( 这个需求基本可以作废了，以后优化的时候删除即可 )
      * @return {object} consequencer
      */
     async indexConverter () {
@@ -36,12 +53,16 @@ class recordService extends Service {
         let errorList = [];
 
         // 清空
-        await this.ctx.app.mysql.query(`delete from record_index_${nowYear};`);
+        // 以前打算 区分每一年的数据的, 但是后来发现这个是伪需求
+        await this.ctx.app.mysql.query(`delete from record_index_2018;`);
+        // await this.ctx.app.mysql.query(`delete from record_index_${nowYear};`);
 
         // 统计年
         let countYear = await this.ctx.app.mysql.query(`select count(*) from record_list_${nowYear};`);
         let saveCountYear = await this.ctx.app.mysql.query(
-            `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("0", "0", "${
+            // 以前打算 区分每一年的数据的, 但是后来发现这个是伪需求
+            // `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("0", "0", "${
+            `insert into record_index_2018 (month_count, week_count, record_amount) values ("0", "0", "${
                 countYear[0]['count(*)']
             }");`
         );
@@ -54,7 +75,9 @@ class recordService extends Service {
             // 统计月
             let countMonth = await this.ctx.app.mysql.query(`select count(*) from record_list_${nowYear} where record_month="${i}";`);
             let saveCountMonth = await this.ctx.app.mysql.query(
-                `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("${i}", "0", "${
+                // 以前打算 区分每一年的数据的, 但是后来发现这个是伪需求
+                // `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("${i}", "0", "${
+                `insert into record_index_2018 (month_count, week_count, record_amount) values ("${i}", "0", "${
                     countMonth[0]['count(*)']
                 }");`
             );  
@@ -116,7 +139,9 @@ class recordService extends Service {
 
         let nowTime = now.getTime();
         let saveRecord = await this.ctx.app.mysql.query(
-            `insert into record_list_${now.getFullYear()} (record_month, record_week, record_day, record_data, timestamp, title, content) values ("${
+            // 以前打算 区分每一年的数据的, 但是后来发现这个是伪需求
+            // `insert into record_list_${now.getFullYear()} (record_month, record_week, record_day, record_data, timestamp, title, content) values ("${
+            `insert into record_list_2018 (record_month, record_week, record_day, record_data, timestamp, title, content) values ("${
                 now.getMonth() + 1   
             }", "${
                 createWeek()
@@ -152,12 +177,14 @@ class recordService extends Service {
     /**
      * 编辑记录
      * @param {number} id 唯一标识
-     * @param {number} year 年份
+     * @param {number} year 年份 （以前打算 区分每一年的数据的, 但是后来发现这个是伪需求）
      * @param {string} title 标题
      * @param {string} content 内容
      * @return {object} 
      */
     async edit(id, year, title, content) {
+        year = 2018; // 直接写死 2018年即可， 到时优化的时候删掉即可
+
         let checkRecord = await this.ctx.app.mysql.query(`select * from record_list_${year} where id="${id}" ;`);
         if (checkRecord instanceof Array === false || checkRecord.length === 0) {
             return consequencer.error('数据有误');
@@ -184,10 +211,12 @@ class recordService extends Service {
     /**
      * 删除记录
      * @param {number} id 唯一标识
-     * @param {number} year 年份
+     * @param {number} year 年份 （以前打算 区分每一年的数据的, 但是后来发现这个是伪需求）
      * @return {object} 
      */
     async delete(id, year) {
+        year = 2018; // 直接写死即可
+
         let checkRecord = await this.ctx.app.mysql.query(`select * from record_list_${year} where id="${id}" ;`);
         if (checkRecord instanceof Array === false || checkRecord.length === 0) {
             return consequencer.error('数据有误');

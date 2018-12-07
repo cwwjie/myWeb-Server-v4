@@ -12,6 +12,7 @@ module.exports = app => {
     // 记录
     router.get('/record/', controller.record.index); // 测试
     router.get('/record/get/one', controller.record.getOneByRandom); // 随机查询一条记录
+    router.get('/record/get/id', controller.record.getOneById); // 根据Id 查询一条记录
     router.get('/record/get/list', controller.record.getListBy); // 根据页码查询记录
     router.post('/record/save', controller.record.save); // 保存一条记录
     router.post('/record/edit', controller.record.edit); // 编辑一条记录
