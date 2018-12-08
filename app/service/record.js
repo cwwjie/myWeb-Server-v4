@@ -1,19 +1,21 @@
 const Service = require('egg').Service;
 const consequencer = require('./../utils/consequencer');
-const convertNumber = require('./../utils/convertNumber');
 
 class recordService extends Service {
     /**
      * 一共多少条记录
      */
     async countall() {
-        let count = await this.ctx.app.mysql.query('select count(*) from record_list_2018;');
+        let count = await this.ctx.app.mysql.query('select count(*) from record;');
 
         // 是否查询到数据
         if (count && count instanceof Array && count[0]['count(*)'] > 0) {
             return count[0]['count(*)'];
+
         } else {
+            // 无数据 返回 0即可
             return 0;
+
         }
     }
 
@@ -24,7 +26,7 @@ class recordService extends Service {
         /**
          * LIMIT 第一个数 是从几开始查 第二个是代表查多少个 
          */
-        return await this.ctx.app.mysql.query(`select * from record_list_2018 order by timestamp desc LIMIT ${num ? (num * 10) : 0}, 10;`);
+        return await this.ctx.app.mysql.query(`select * from record order by timestamp desc LIMIT ${num ? (num * 10) : 0}, 10;`);
     }
 
     /**
@@ -32,87 +34,31 @@ class recordService extends Service {
      * @param {number || string} id 记录的唯一 id （此 id 默认是正确的不进行 校验）
      */
     async getOneById(id) {
-        let checkRecord = await this.ctx.app.mysql.query(`select * from record_list_2018 where id="${id}" ;`);
+        // 执行SQL语句
+        let checkRecord = await this.ctx.app.mysql.query(`select * from record where id="${id}" ;`);
+
+        // 判断是否查询成功
         if (checkRecord instanceof Array === false || checkRecord.length === 0) {
             return consequencer.error('无此 id 记录');
         }
         
-        return consequencer.success({
-            id: checkRecord[0].id,
-            title: checkRecord[0].title,
-            content: checkRecord[0].content,
-        });
+        return consequencer.success({id: checkRecord[0].id, title: checkRecord[0].title, content: checkRecord[0].content});
     }
 
     /**
-     * 随机查询10条记录
+     * 随机查询 N 条记录
      */
-    async getByRandom() {
-        return await this.ctx.app.mysql.query('select * from record_list_2018 order by rand() limit 10;');
-    }
+    async getByRandom(N) {
+        // 执行随机查询的SQL
+        let selectRandom = await this.ctx.app.mysql.query(`select * from record order by rand() limit ${N ? N : 1};`);
+        
+        // 判断 查询的 SQL 是否成功
+        if (selectRandom instanceof Array === false || selectRandom.length === 0) {
+            return consequencer.error('随机查询的SQL查询失败');
 
-    /**
-     * 将记录表转换为索引表 ( 这个需求基本可以作废了，以后优化的时候删除即可 )
-     * @return {object} consequencer
-     */
-    async indexConverter () {
-        let nowYear = new Date().getFullYear(); // 今年
-        let errorList = [];
-
-        // 清空
-        // 以前打算 区分每一年的数据的, 但是后来发现这个是伪需求
-        await this.ctx.app.mysql.query(`delete from record_index_2018;`);
-        // await this.ctx.app.mysql.query(`delete from record_index_${nowYear};`);
-
-        // 统计年
-        let countYear = await this.ctx.app.mysql.query(`select count(*) from record_list_${nowYear};`);
-        let saveCountYear = await this.ctx.app.mysql.query(
-            // 以前打算 区分每一年的数据的, 但是后来发现这个是伪需求
-            // `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("0", "0", "${
-            `insert into record_index_2018 (month_count, week_count, record_amount) values ("0", "0", "${
-                countYear[0]['count(*)']
-            }");`
-        );
-
-        if (saveCountYear.warningCount !== 0 || saveCountYear.message !== '' ) {
-            errorList.push(consequencer.error('统计一年所有失败', 2332, saveCountYear));
-        }
-
-        for (let i = 1; i <= 12; i++) {
-            // 统计月
-            let countMonth = await this.ctx.app.mysql.query(`select count(*) from record_list_${nowYear} where record_month="${i}";`);
-            let saveCountMonth = await this.ctx.app.mysql.query(
-                // 以前打算 区分每一年的数据的, 但是后来发现这个是伪需求
-                // `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("${i}", "0", "${
-                `insert into record_index_2018 (month_count, week_count, record_amount) values ("${i}", "0", "${
-                    countMonth[0]['count(*)']
-                }");`
-            );  
-
-            if (saveCountMonth.warningCount !== 0 || saveCountMonth.message !== '' ) {
-                errorList.push(consequencer.error(`统计${i}月的记录数据失败`, 2332, saveCountMonth));
-            }
-
-            for (let j = 1; j <= 4; j++) {
-                // 统计周
-                let countWeek = await this.ctx.app.mysql.query(`select count(*) from record_list_${nowYear} where record_month="${i}" and record_week
-                ="${j}";`);
-                let saveCountWeek = await this.ctx.app.mysql.query(
-                    `insert into record_index_${nowYear} (month_count, week_count, record_amount) values ("${i}", "${j}", "${
-                        countWeek[0]['count(*)']
-                    }");`
-                );
-
-                if (saveCountWeek.warningCount !== 0 || saveCountWeek.message !== '' ) {
-                    errorList.push(consequencer.error(`统计${i}月的第${j}周的记录数据失败`, 2332, saveCountWeek));
-                }
-            }
-        }
-
-        if (errorList.length === 0) {
-            return consequencer.success();
         } else {
-            return consequencer.error('统计数据出现错误!', 3223, errorList)
+            return consequencer.success();
+
         }
     }
     
@@ -120,188 +66,80 @@ class recordService extends Service {
      * 存储记录
      * @param {string} title 标题
      * @param {string} content 内容
-     * @return {object} {
-     *   id: 0,
-     *   title: '',
-     *   content: '',
-     * }
+     * @return {object} id title content
      */
     async save(title, content) {
-        let now = new Date();
-        let myDate = now.getDate();
-        let createWeek = () => {
-            if (myDate <= 7) {
-                return 1
-            }
-            if (myDate > 7 && myDate <= 14) {
-                return 2
-            }
-            if (myDate > 14 && myDate <= 21) {
-                return 3
-            }
-            if (myDate > 21) {
-                return 4
-            }
-        }
+        // 执行SQL语句
+        let saveRecord = await this.ctx.app.mysql.query(`insert into record (timestamp, title, content) values ("${new Date().getTime()}", "${title}", "${content}");`);
 
-        let nowTime = now.getTime();
-        let saveRecord = await this.ctx.app.mysql.query(
-            // 以前打算 区分每一年的数据的, 但是后来发现这个是伪需求
-            // `insert into record_list_${now.getFullYear()} (record_month, record_week, record_day, record_data, timestamp, title, content) values ("${
-            `insert into record_list_2018 (record_month, record_week, record_day, record_data, timestamp, title, content) values ("${
-                now.getMonth() + 1   
-            }", "${
-                createWeek()
-            }", "${
-                now.getDay() + 1
-            }", "${
-                myDate
-            }", "${
-                nowTime
-            }", "${
-                title
-            }", "${
-                content
-            }");`
-        );
+        // 判断是否保存成功
+        if (saveRecord && saveRecord.warningCount === 0 && saveRecord.message === "") {
+            return consequencer.success({id: saveRecord.insertId, title: title, content: content});
 
-        // 是否查询到数据 
-        if (
-            saveRecord && 
-            saveRecord.warningCount === 0 &&
-            saveRecord.message === ""
-        ) {
-            return consequencer.success({
-                id: saveRecord.insertId,
-                title: title,
-                content: content
-            });
         } else {
             return consequencer.error(`数据库保存失败, 原因: ${saveRecord.message}.`);
+
         }
     }
     
     /**
      * 编辑记录
      * @param {number} id 唯一标识
-     * @param {number} year 年份 （以前打算 区分每一年的数据的, 但是后来发现这个是伪需求）
      * @param {string} title 标题
      * @param {string} content 内容
      * @return {object} 
      */
-    async edit(id, year, title, content) {
-        year = 2018; // 直接写死 2018年即可， 到时优化的时候删掉即可
+    async edit(id, title, content) {
 
-        let checkRecord = await this.ctx.app.mysql.query(`select * from record_list_${year} where id="${id}" ;`);
-        if (checkRecord instanceof Array === false || checkRecord.length === 0) {
-            return consequencer.error('数据有误');
+        // 根据 id 查询一条记录
+        let checkRecord = await this.ctx.service.record.getOneById(id);
+
+        // 校验 是否 未查询到记录
+        if (checkRecord.result !== 1) {
+            return consequencer.error('数据有误'); // 未能 根据 id 查询一条记录 返回失败
         }
-        let updateRecord = await this.ctx.app.mysql.query(
-            `update record_list_${year} set title="${title}",content="${content}",timestamp="${new Date().getTime()}" where id="${id}";`
-        );
 
-        // 是否保存成功? 
-        if (
-            updateRecord && 
-            updateRecord.warningCount === 0
-        ) {
-            return consequencer.success({
-                id: id,
-                year: year,
-                title: title,
-                content: content
-            });
+        // 查询记录成功的下 执行修改的 SQL
+        let updateRecord = await this.ctx.app.mysql.query(`update record set title="${title}",content="${content}",timestamp="${new Date().getTime()}" where id="${id}";`);
+
+        // 判断 SQL 是否执行成功
+        if (updateRecord && updateRecord.warningCount === 0) {
+            // 如果成功修改 直接返回数据即可
+            return consequencer.success({ id: id, year: year, title: title, content: content});
+
         } else {
             return consequencer.error(`数据库修改失败, 原因: ${updateRecord.message}.`);
+
         }
-    }    
+    }
+    
     /**
      * 删除记录
      * @param {number} id 唯一标识
-     * @param {number} year 年份 （以前打算 区分每一年的数据的, 但是后来发现这个是伪需求）
      * @return {object} 
      */
-    async delete(id, year) {
-        year = 2018; // 直接写死即可
+    async delete(id) {
 
-        let checkRecord = await this.ctx.app.mysql.query(`select * from record_list_${year} where id="${id}" ;`);
-        if (checkRecord instanceof Array === false || checkRecord.length === 0) {
-            return consequencer.error('数据有误');
+        // 根据 id 查询一条记录
+        let checkRecord = await this.ctx.service.record.getOneById(id);
+
+        // 校验 是否 未查询到记录
+        if (checkRecord.result !== 1) {
+            return consequencer.error('不存在此条数据'); // 未能 根据 id 查询一条记录 返回失败
         }
-        let deleteRecord = await this.ctx.app.mysql.query(
-            `delete from record_list_${year} where id="${id}";`
-        );
 
-        // 是否删除成功? 
-        if (
-            deleteRecord && 
-            deleteRecord.warningCount === 0
-        ) {
+        // 如果存在id 执行 删除的SQL语句
+        let deleteRecord = await this.ctx.app.mysql.query(`delete from record where id="${id}";`);
+        
+        // 判断删除的SQL是否执行成功
+        if (deleteRecord && deleteRecord.warningCount === 0) {
             return consequencer.success();
+
         } else {
             return consequencer.error(`删除数据修改失败, 原因: ${deleteRecord.message}.`);
+
         }
     }    
-
-    /**
-     * 随机查询一条记录
-     * @return {object} consequencer
-     */
-    async getOne() {
-        let countAmount = 0; // 一共多少条数据
-        let indexArray = [ // 每个年份对应数据的下标
-            // {
-            //     year: 2018, // 对应年份
-            //     countStart: 0, // 统计之前的数据
-            //     countEnd: 1,   // 统计过后的数据
-            // }
-        ];
-
-        let countStart = 1; // 统计之前的数据
-        // 统计一共有多少数据
-        for (let thisYear = 2018; thisYear <= new Date().getFullYear(); thisYear++) {
-            let countYear = await this.ctx.app.mysql.query(`select record_amount from record_index_${thisYear} where month_count="0" and week_count="0";`);
-
-            if (countYear.length === 0) { // 如果出现这种情况表示未进行统计
-                await this.ctx.service.record.indexConverter(); // 统计一次
-                countYear = await this.ctx.app.mysql.query(`select record_amount from record_index_${thisYear} where month_count="0" and week_count="0";`); // 再次获取统计过后的数据
-            }
-            countAmount += countYear[0]['count(*)'];
-            indexArray.push({
-                year: thisYear,
-                countStart: countStart,
-                countEnd: countAmount,
-            });
-
-            // 进入下一个循环
-            countStart = countAmount;
-        }
-
-        // 随机数, 用于判断在哪个年份
-        let randomIndex = convertNumber.creatRandomBy(1, countAmount === 0 ? 1 : countAmount);
-        let targetYear = 2018; // 查询的年份(随机生成)
-        for (let i = 0; i < indexArray.length; i++) {
-            if (
-                randomIndex > indexArray[i].countStart &&
-                randomIndex <= indexArray[i].countEnd
-            ) {
-                targetYear = indexArray[i].year;
-            }
-        }
-        
-        let record = await this.ctx.app.mysql.query(`select  *  from  record_list_${targetYear} order by rand() limit 1`);
-
-        if (record.length > 0) { // 成功
-            return consequencer.success({
-                id: record[0].id,
-                year: targetYear,
-                title: record[0].title,
-                content: record[0].content,
-            });
-        } else {
-            return consequencer.error('数据为空')
-        }
-    }
 }
 
 module.exports = recordService;

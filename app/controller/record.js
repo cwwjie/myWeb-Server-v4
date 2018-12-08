@@ -12,7 +12,14 @@ class RecordController extends Controller {
      * 随机查询一条记录
      */
     async getOneByRandom() {
-        this.ctx.body = await this.ctx.service.record.getOne();
+        this.ctx.body = await this.ctx.service.record.getByRandom(1);
+    }
+
+    /**
+     * 随机查询10条记录
+     */
+    async getByRandom() {
+        this.ctx.body = await this.ctx.service.record.getByRandom(10);
     }
 
     /**
@@ -30,14 +37,14 @@ class RecordController extends Controller {
     }
 
     /**
-     * 根据页码查询记录
-     * @param {number} pagenum 多少页
+     * 根据页码查询 10条记录
+     * @param {number} pagenum 多少页 非必填
      */
     async getListBy() {
-        // 判断参数
-        let pagenum = 0;
+        // 因为页码是可以不传值的
+        let pagenum = 0; // 页数
         if (this.ctx.request.query && this.ctx.request.query.pagenum) {
-            pagenum = parseInt(this.ctx.request.query.pagenum) - 1;
+            pagenum = parseInt(this.ctx.request.query.pagenum) - 1; // 
         }
 
         this.ctx.request.query.pagenum ? this.ctx.request.query.pagenum : 0; // 查询多少页
@@ -46,18 +53,9 @@ class RecordController extends Controller {
         let result = await this.ctx.service.record.getByPageNum(pagenum); // 根据页码查询多少条记录;
 
         this.ctx.body = consequencer.success({
-            count: countall, // 一共有多少条数据
             pageTotal: Math.ceil(countall / 10), // 一共有多少个页面
             list: result,
         });
-    }
-
-    /**
-     * 随机查询16条记录
-     */
-    async getByRandom() {
-        let result = await this.ctx.service.record.getByRandom();
-        this.ctx.body = consequencer.success(result);
     }
 
     /**
@@ -95,17 +93,7 @@ class RecordController extends Controller {
         const payload = this.ctx.request.body;
 
         // 判断一些必填项目
-        if (
-            !payload ||
-            !payload.id ||
-            !payload.year ||
-            !payload.title ||
-            !payload.content ||
-            typeof payload.id !== 'number' ||
-            typeof payload.year !== 'number' ||
-            typeof payload.title !== 'string' ||
-            typeof payload.content !== 'string'
-        ) {
+        if ( !payload || !payload.id || !payload.title || !payload.content || typeof payload.id !== 'number' || typeof payload.title !== 'string' || typeof payload.content !== 'string') {
             return this.ctx.body = consequencer.error('payload is error');
         }
 
@@ -115,27 +103,18 @@ class RecordController extends Controller {
             return this.ctx.body = myVerify;
         }
 
-        this.ctx.body = await this.ctx.service.record.edit(payload.id, payload.year, payload.title, payload.content);
+        this.ctx.body = await this.ctx.service.record.edit(payload.id, payload.title, payload.content);
     }
 
     /**
      * 删除一条记录
-     * @param {object} payload {
-     *   title: string, 标题
-     *   content: string, 内容
-     * }
+     * @param {number} id 记录的唯一标识 
      */
     async delete() {
         const payload = this.ctx.request.body;
 
         // 判断一些必填项目
-        if (
-            !payload ||
-            !payload.id ||
-            !payload.year ||
-            typeof payload.id !== 'number' ||
-            typeof payload.year !== 'number'
-        ) {
+        if (!payload || !payload.id || typeof payload.id !== 'number' ) {
             return this.ctx.body = consequencer.error('payload is error');
         }
 
@@ -145,7 +124,7 @@ class RecordController extends Controller {
             return this.ctx.body = myVerify;
         }
 
-        this.ctx.body = await this.ctx.service.record.delete(payload.id, payload.year);
+        this.ctx.body = await this.ctx.service.record.delete(payload.id);
     }
 }
 
