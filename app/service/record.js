@@ -45,6 +45,13 @@ class recordService extends Service {
     }
 
     /**
+     * 随机查询10条记录
+     */
+    async getByRandom() {
+        return await this.ctx.app.mysql.query('select * from record_list_2018 order by rand() limit 10;');
+    }
+
+    /**
      * 将记录表转换为索引表 ( 这个需求基本可以作废了，以后优化的时候删除即可 )
      * @return {object} consequencer
      */

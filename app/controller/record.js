@@ -46,9 +46,18 @@ class RecordController extends Controller {
         let result = await this.ctx.service.record.getByPageNum(pagenum); // 根据页码查询多少条记录;
 
         this.ctx.body = consequencer.success({
-            count: countall,
+            count: countall, // 一共有多少条数据
+            pageTotal: Math.ceil(countall / 10), // 一共有多少个页面
             list: result,
         });
+    }
+
+    /**
+     * 随机查询16条记录
+     */
+    async getByRandom() {
+        let result = await this.ctx.service.record.getByRandom();
+        this.ctx.body = consequencer.success(result);
     }
 
     /**

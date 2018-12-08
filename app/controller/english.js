@@ -25,7 +25,8 @@ class HomeController extends Controller {
         let result = await this.ctx.service.english.getByPageNum(pagenum); // 根据页码查询多少条记录;
 
         this.ctx.body = consequencer.success({
-            count: countall,
+            count: countall, // 一共有多少条数据
+            pageTotal: Math.ceil(countall / 10), // 一共有多少个页面
             list: result,
         });
     }
