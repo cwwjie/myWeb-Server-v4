@@ -12,7 +12,18 @@ class RecordController extends Controller {
      * 随机查询一条记录
      */
     async getOneByRandom() {
-        this.ctx.body = await this.ctx.service.record.getByRandom(1);
+        let myRandom = await this.ctx.service.record.getByRandom(1);
+
+        // 校验是否正确
+        if (myRandom.result === 1) {
+            // 正确的情况下，将数组转换为 对象返回 
+            this.ctx.body = consequencer.success(myRandom.data[0]);
+
+        } else {
+            // 错误的情况下直接返回错误信息就可以了
+            this.ctx.body = myRandom;
+
+        }
     }
 
     /**

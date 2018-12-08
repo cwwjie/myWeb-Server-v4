@@ -53,11 +53,12 @@ class recordService extends Service {
         let selectRandom = await this.ctx.app.mysql.query(`select * from record order by rand() limit ${N ? N : 1};`);
         
         // 判断 查询的 SQL 是否成功
-        if (selectRandom instanceof Array === false || selectRandom.length === 0) {
-            return consequencer.error('随机查询的SQL查询失败');
+        if (selectRandom && selectRandom instanceof Array && selectRandom.length > 0) {
+            // 成功的情况返回 SQL 查询到的数据
+            return consequencer.success(selectRandom);
 
         } else {
-            return consequencer.success();
+            return consequencer.error('随机查询的SQL查询失败');
 
         }
     }
