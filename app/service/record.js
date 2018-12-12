@@ -106,10 +106,10 @@ class recordService extends Service {
         // 判断 SQL 是否执行成功
         if (updateRecord && updateRecord.warningCount === 0) {
             // 如果成功修改 直接返回数据即可
-            return consequencer.success({ id: id, year: year, title: title, content: content});
+            return consequencer.success(checkRecord.data);
 
         } else {
-            return consequencer.error(`数据库修改失败, 原因: ${updateRecord.message}.`);
+            return consequencer.error(`数据库修改失败, 原因: ${JSON.stringify(updateRecord)}.`);
 
         }
     }

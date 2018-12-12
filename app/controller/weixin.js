@@ -139,65 +139,10 @@ class WeixinController extends Controller {
 
     /**
      * 获取公众号用于调用微信JS接口的临时票据 jsapi_ticket 
-     * 如果数据库 存在 jsapi_ticket, 并且 expires_timestamp 未过期. 返回 jsapi_ticket.
-     * 如果数据库 不存在 jsapi_ticket, 或 expires_timestamp 过期. 获取微信 jsapi_ticket 并且返回.
+     * 【注意】 此接口仅用来进行测试 server 层的代码, 所以不写任何逻辑
      */
     async getJsApi_ticket() {
-        // 首先去数据查询一次 公众号用于调用微信JS接口的临时票据
-        let jsapiTicketQuery =  await this.ctx.service.weixin.getJsApi_ticket();
-
-        // 判断 查询数据库的结果是否正确
-        if (jsapiTicketQuery.result === 1) {
-            // 如果正确的情况下 直接返回结果即可
-            return jsapiTicketQuery
-        }
-
-        // 如果数据库查询的 jsapi_ticket 不正确
-        // 先获取公众号的全局唯一接口调用凭据
-        let accessTokenQuery =  await this.ctx.controller.weixin.getGlobalAccess_token();
-
-        // 判断 获取公众号的全局唯一接口调用凭据 是否有误
-        if (accessTokenQuery.result !== 1) {
-            // 如果有误的情况下 直接返回错误的接口 即可
-            // 因为无法 获取公众号的全局唯一接口调用凭据的话 是无法继续下一步的
-            return accessTokenQuery
-        }
-
-        // 成功获取 获取公众号的全局唯一接口调用凭据 的情况
-        // 通过公众号的全局唯一接口调用凭据 access_token 交换调用微信JS接口的临时票据 jsapi_ticket
-        let newJsapiTicketQuery = await getjsonby(`https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=${access_token}&type=jsapi`)
-        .then(val => {
-            // 返回的数据格式参考例子
-            // val = {
-            //   "errcode": 0,
-            //   "errmsg": "ok",
-            //   "ticket": "bxLdikRXVbTPdHSM05e5u5sUoXNKd8-41ZO3MhKoyN5OfkWITDGgnr2fwJ0m9E8NYzWKVZvdVtaUgWvsdshFKA",
-            //   "expires_in": 7200
-            // }
-
-            // 判断返回的数据是否正确
-            if (val.errcode === 0) {
-                return request.success(val.ticket)
-            }
-            return consequencer.error(`通过公众号的全局唯一接口调用凭据 access_token 交换调用微信JS接口的临时票据 jsapi_ticket 数据有误, 原因: ${val.errmsg}.`);
-
-        }, error => {
-            return consequencer.error(`通过公众号的全局唯一接口调用凭据 access_token 交换调用微信JS接口的临时票据 jsapi_ticket 错误, 原因: ${error}.`);
-        });
-
-        // 判断 通过公众号的全局唯一接口调用凭据 access_token 交换调用微信JS接口的临时票据 jsapi_ticket 有误
-        if (newJsapiTicketQuery.result !== 1) {
-            // 如果有误的情况下 直接返回错误结果
-            return newJsapiTicketQuery
-        }
-
-        // 如果 成功 的情况下 (通过公众号的全局唯一接口调用凭据 access_token 交换调用微信JS接口的临时票据 jsapi_ticket)
-        // 存储 jsapi_ticket
-        let saveNewJsapiTicket =  await this.ctx.controller.weixin.saveJsApi_ticket(newJsapiTicketQuery.data);
-
-        // 判断是否保存成功
-        if (saveNewJsapiTicket.result === 1) {
-        }
+        this.ctx.body = await this.ctx.service.weixin.getJsApi_ticket();
     }
 }
 
