@@ -1,9 +1,11 @@
+// 框架类
 const Controller = require('egg').Controller;
-const consequencer = require('./../utils/consequencer');
-const encryption = require('./../utils/encryption');
-const postjsonby = require('./../utils/postjsonbyhttps');
 const parseString = require('xml2js').parseString;
 const lodash = require('lodash');
+// 组件类
+const consequencer = require('./../utils/consequencer');
+const encryption = require('./../utils/encryption');
+const getjsonby = require('./../utils/getjsonbyhttps');
 
 class WeixinController extends Controller {
     async index() {
@@ -14,7 +16,7 @@ class WeixinController extends Controller {
      * 验证开发者服务器 正确响应微信发送的Token验证
      * @return {string} echostr {};
      */
-    async handle() {
+    async responseHandle() {
         let request = this.ctx;
 
         // 判断参数
@@ -31,28 +33,6 @@ class WeixinController extends Controller {
             return this.ctx.body = request.query.echostr;
         } else {
             return this.ctx.body = consequencer.error('Token验证失败!');
-        }
-    }
-
-    /**
-     * 获取公众号的全局唯一接口调用凭据
-     * @return {string} access_token '11_Hi0KxrnvVN_RP47QqLd6_lkV8EAgKSLG_CL28rFgJd4eMaVc0g4jEOIgZ_BulbYXvKcGUTVfN6aaQHpY-xNxiTPO7c5xU_Yj7nRS7bpRtYPsT1K61xG2haGyAcgFzDl9KfCGmKBJyK9SKX8wYBMbAEAGJU'
-     */
-    async getGlobalAccess_token() {
-        let myAccessToken = await this.ctx.service.weixin.getGlobalAccess_token();
-
-        // 查询失败
-        if (myAccessToken.result !== 1) {
-            return this.ctx.body = myAccessToken;
-        }
-
-        // 查询成功
-        if (myAccessToken.data.value && typeof(myAccessToken.data.value) === 'string') { // 判断格式是否正确
-            return this.ctx.body = consequencer.success({
-                access_token: myAccessToken.data.value
-            });
-        } else {
-            return this.ctx.body = consequencer.error('查询数据格式有误!');
         }
     }
 
@@ -150,38 +130,75 @@ class WeixinController extends Controller {
     }
 
     /**
-     * 创建菜单界面 (作废 因为公众号 需要通过认证)
-     * @return {boolen} 是否成功创建
+     * 获取公众号的全局唯一接口调用凭据
+     * 【注意】 此接口仅用来进行测试 server 层的代码, 所以不写任何逻辑
      */
-    async createMenu() {
-        return this.ctx.body = '接口已废弃';
-        let myAccessToken = await this.ctx.service.weixin.getGlobalAccess_token();
-        
-        // 查询失败
-        if (myAccessToken.result !== 1) {
-            return this.ctx.body = consequencer.error(`获取access_token失败! 原因: ${myAccessToken.message}`);
-        }
-
-        let myMenu = [
-            {
-                'type': 'click',
-                'name': '测试按钮',
-                'key': 'V1001_TODAY_MUSIC'
-            }
-        ];
-        let mycreate = await postjsonby(
-            'api.weixin.qq.com', 
-            `/cgi-bin/menu/create?access_token=${myAccessToken.data.value}`, 
-            myMenu
-        ).then(
-            success => consequencer.success(success),
-            error => consequencer.error(`请求微信服务器出现错误, 原因${error}. 请求myAccessToken: ${myAccessToken.data.value}`, -200, error)
-        );
-
-        return this.ctx.body = mycreate;
+    async getGlobalAccess_token() {
+        this.ctx.body = await this.ctx.service.weixin.getGlobalAccess_token();
     }
 
-    
+    /**
+     * 获取公众号用于调用微信JS接口的临时票据 jsapi_ticket 
+     * 如果数据库 存在 jsapi_ticket, 并且 expires_timestamp 未过期. 返回 jsapi_ticket.
+     * 如果数据库 不存在 jsapi_ticket, 或 expires_timestamp 过期. 获取微信 jsapi_ticket 并且返回.
+     */
+    async getJsApi_ticket() {
+        // 首先去数据查询一次 公众号用于调用微信JS接口的临时票据
+        let jsapiTicketQuery =  await this.ctx.service.weixin.getJsApi_ticket();
+
+        // 判断 查询数据库的结果是否正确
+        if (jsapiTicketQuery.result === 1) {
+            // 如果正确的情况下 直接返回结果即可
+            return jsapiTicketQuery
+        }
+
+        // 如果数据库查询的 jsapi_ticket 不正确
+        // 先获取公众号的全局唯一接口调用凭据
+        let accessTokenQuery =  await this.ctx.controller.weixin.getGlobalAccess_token();
+
+        // 判断 获取公众号的全局唯一接口调用凭据 是否有误
+        if (accessTokenQuery.result !== 1) {
+            // 如果有误的情况下 直接返回错误的接口 即可
+            // 因为无法 获取公众号的全局唯一接口调用凭据的话 是无法继续下一步的
+            return accessTokenQuery
+        }
+
+        // 成功获取 获取公众号的全局唯一接口调用凭据 的情况
+        // 通过公众号的全局唯一接口调用凭据 access_token 交换调用微信JS接口的临时票据 jsapi_ticket
+        let newJsapiTicketQuery = await getjsonby(`https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=${access_token}&type=jsapi`)
+        .then(val => {
+            // 返回的数据格式参考例子
+            // val = {
+            //   "errcode": 0,
+            //   "errmsg": "ok",
+            //   "ticket": "bxLdikRXVbTPdHSM05e5u5sUoXNKd8-41ZO3MhKoyN5OfkWITDGgnr2fwJ0m9E8NYzWKVZvdVtaUgWvsdshFKA",
+            //   "expires_in": 7200
+            // }
+
+            // 判断返回的数据是否正确
+            if (val.errcode === 0) {
+                return request.success(val.ticket)
+            }
+            return consequencer.error(`通过公众号的全局唯一接口调用凭据 access_token 交换调用微信JS接口的临时票据 jsapi_ticket 数据有误, 原因: ${val.errmsg}.`);
+
+        }, error => {
+            return consequencer.error(`通过公众号的全局唯一接口调用凭据 access_token 交换调用微信JS接口的临时票据 jsapi_ticket 错误, 原因: ${error}.`);
+        });
+
+        // 判断 通过公众号的全局唯一接口调用凭据 access_token 交换调用微信JS接口的临时票据 jsapi_ticket 有误
+        if (newJsapiTicketQuery.result !== 1) {
+            // 如果有误的情况下 直接返回错误结果
+            return newJsapiTicketQuery
+        }
+
+        // 如果 成功 的情况下 (通过公众号的全局唯一接口调用凭据 access_token 交换调用微信JS接口的临时票据 jsapi_ticket)
+        // 存储 jsapi_ticket
+        let saveNewJsapiTicket =  await this.ctx.controller.weixin.saveJsApi_ticket(newJsapiTicketQuery.data);
+
+        // 判断是否保存成功
+        if (saveNewJsapiTicket.result === 1) {
+        }
+    }
 }
 
 module.exports = WeixinController;

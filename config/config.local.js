@@ -6,10 +6,11 @@ module.exports = {
         }
     },
 
-    weixin: {
-        appID: 'wx34ce4f0ce6eadb39',
-        appsecret: '317b46c976749223abf57213fce07b0f'
-    },
+    // 这个不知道是哪里来的，暂时放置在这里吧
+    // weixin: {
+    //     appID: 'wx34ce4f0ce6eadb39',
+    //     appsecret: '317b46c976749223abf57213fce07b0f'
+    // },
 
     mysql: {
         app: true,    // 是否加载到 app 上，默认开启

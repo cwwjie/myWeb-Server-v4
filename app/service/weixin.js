@@ -45,7 +45,7 @@ class weixinService extends Service {
         // 请求成功
         let expire_timestamp = Date.parse(new Date()) + 7200000;
         let access_token = requestToken.data;
-        await this.ctx.app.mysql.query(`update weixin set value='${access_token}',expire_timestamp='${expire_timestamp}' where  my_key='global_access_token';`);
+        await this.ctx.app.mysql.query(`update weixin set value='${access_token}',expire_timestamp='${expire_timestamp}' where my_key='global_access_token';`);
 
         // 判断是否更新成功
         let global_access_token = await this.ctx.app.mysql.query("select * from weixin where my_key='global_access_token';");
@@ -58,6 +58,7 @@ class weixinService extends Service {
         }
 
     }
+
     /**
      * 获取公众号的全局唯一接口调用凭据
      * @return {object} {
@@ -67,31 +68,80 @@ class weixinService extends Service {
      * };
      */
     async getGlobalAccess_token() {
+        // 首先执行 SQL 查询 数据库是否存在 global_access_token
         let global_access_token = await this.ctx.app.mysql.query("select * from weixin where my_key='global_access_token';");
         
-        // 是否查询成功
-        if (global_access_token.length === 0) {
-            return consequencer.error('查询为空');
+        // 判断查询是否正确
+        if (global_access_token instanceof Array === false  || global_access_token.length <= 0) {
+            return consequencer.error(' SQL 查询 公众号的全局唯一接口调用凭据 global_access_token 有误');
         }
 
-        // 判断是否过期
+        // 判断是否 有效 未过期
         let mytoken = global_access_token[0];
-        if (Date.parse(new Date()) < parseInt(mytoken.expire_timestamp)) {
-            // 现在日期 小于 过期时间
+        if (Date.parse(new Date()) < parseInt(mytoken.expire_timestamp)) { // 现在日期 小于 过期时间
+            // 未过期的情况下 直接返回 global_access_token
             return consequencer.success(mytoken);
         }
 
-        // 过期 (向微信服务器请求)
+        // 过期情况下
+        // 获取新的 global_access_token (向微信服务器请求)
         let refreshAccessToken = await this.ctx.service.weixin.requestGlobalAccess_token();
+
+        // 判断是否成功获取新的 global_access_token
         if (refreshAccessToken.result === 1) {
+            // 成功获取返回成功的数据即可
             return consequencer.success({
                 "my_key": "global_access_token",
                 "value": refreshAccessToken.data,
                 "expire_timestamp": (Date.parse(new Date()) + 7200000 - 5)
             });
         } else {
+            // 获取失败的情况下 返回 失败
             return refreshAccessToken;
         }
+    }
+    
+    /**
+     * 获取 jsapi_ticket
+     * 如果数据库 存在 jsapi_ticket, 并且 expires_timestamp 未过期. 返回 jsapi_ticket.
+     * 如果数据库 不存在 jsapi_ticket, 或 expires_timestamp 过期. 返回失败即可.
+     */
+    async getJsApi_ticket() {
+        // 首先执行 SQL 查询 数据库是否存在 jsapi_ticket
+        let jsapi_ticket = await this.ctx.app.mysql.query("select * from weixin where my_key='jsapi_ticket';");
+
+        // 判断查询是否正确
+        if (jsapi_ticket && jsapi_ticket instanceof Array  && checkRecord.length > 0) {
+
+            // 判断一下是否未过期
+            if (new Date().getTime() > jsapi_ticket[0].expire_timestamp) {
+                // 未过期的情况 返回 jsapi_ticket 的值即可
+                return consequencer.success(jsapi_ticket[0].value);
+
+            } else {
+
+                return consequencer.error('数据有误');
+            }
+        } else {
+
+            return consequencer.error('数据有误');
+        }
+    }
+    
+    /**
+     * 保存 jsapi_ticket
+     */
+    async saveJsApi_ticket(jsapi_ticket) {
+        let expire_timestamp = Date.parse(new Date()) + 7200000;
+        
+        let awaitSave = await this.ctx.app.mysql.query(`update weixin set value='${jsapi_ticket}',expire_timestamp='${expire_timestamp}' where my_key='jsapi_ticket';`);
+
+        // 判断是否插入成功
+        if (awaitSave.warningCount === 0) {
+            return consequencer.success();
+        }
+        
+        return consequencer.error('SQL存储jsapi_ticket失败', 2, awaitSave);
     }
 }
 

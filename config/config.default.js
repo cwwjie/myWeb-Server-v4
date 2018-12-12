@@ -7,6 +7,11 @@ module.exports = {
         pass: 'ojfwghzywucqbgie',
     },
 
+    weixin: {
+        appID: 'wx06f92cb00a7f9670',
+        appsecret: '01dcd0b3250d904eb1ea509f1cc9fcad'
+    },
+
     /**
      * 百度的通用配置，不管测试还是生产都是这个配置
      */
