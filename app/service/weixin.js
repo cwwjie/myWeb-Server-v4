@@ -5,14 +5,12 @@ const getjsonby = require('./../utils/getjsonbyhttps');
 class weixinService extends Service {
     /**
      * 向微信服务器请求 公众号的全局唯一接口调用凭据 并且存储到 数据库
-     * @return {object} {
-     *    "global_access_token": "11_Hi0KxrnvVN_RP47QqLd6_lkV8EAgKSLG_CL28rFgJd4eMaVc0g4jEOIgZ_BulbYXvKcGUTVfN6aaQHpY-xNxiTPO7c5xU_Yj7nRS7bpRtYPsT1K61xG2haGyAcgFzDl9KfCGmKBJyK9SKX8wYBMbAEAGJU",
-     * };
+     * （这个方法不应该抽象出来, 暂时无所谓吧, ）
      */
     async reqrefrGlobalAccess_token() {
         let grant_type = 'client_credential',
-        appID = this.config.weixin.appID,
-        appsecret = this.config.weixin.appsecret;
+            appID = this.config.weixin.appID,
+            appsecret = this.config.weixin.appsecret;
 
         let requestToken = await getjsonby(`https://api.weixin.qq.com/cgi-bin/token?grant_type=${grant_type}&appid=${appID}&secret=${appsecret}`)
         .then(
@@ -43,7 +41,7 @@ class weixinService extends Service {
         }
 
         // 请求成功
-        let expire_timestamp = Date.parse(new Date()) + 7200000;
+        let expire_timestamp = new Date().getTime() + 7200000;
         let access_token = requestToken.data;
         await this.ctx.app.mysql.query(`update weixin set value='${access_token}',expire_timestamp='${expire_timestamp}' where my_key='global_access_token';`);
 
@@ -61,11 +59,8 @@ class weixinService extends Service {
 
     /**
      * 获取公众号的全局唯一接口调用凭据
-     * @return {object} {
-     *    "my_key": "global_access_token",
-     *    "value": "11_Hi0KxrnvVN_RP47QqLd6_lkV8EAgKSLG_CL28rFgJd4eMaVc0g4jEOIgZ_BulbYXvKcGUTVfN6aaQHpY-xNxiTPO7c5xU_Yj7nRS7bpRtYPsT1K61xG2haGyAcgFzDl9KfCGmKBJyK9SKX8wYBMbAEAGJU",
-     *    "expire_timestamp": 733816000000
-     * };
+     * 如果数据库 存在 global_access_token, 并且 expires_timestamp 未过期. 返回 global_access_token.
+     * 如果数据库 不存在 global_access_token, 或 expires_timestamp 过期. 返回失败即可.
      */
     async getGlobalAccess_token() {
         // 首先执行 SQL 查询 数据库是否存在 global_access_token
@@ -81,7 +76,7 @@ class weixinService extends Service {
         let mytoken = global_access_token[0];
         if (new Date().getTime() < parseInt(mytoken.expire_timestamp)) { // 现在日期 小于 过期时间
             // 未过期的情况下 直接返回 global_access_token
-            return consequencer.success(mytoken);
+            return consequencer.success(mytoken.value);
         }
 
         // 过期情况下
@@ -91,14 +86,12 @@ class weixinService extends Service {
         // 判断是否成功获取新的 global_access_token
         if (refreshAccessToken.result === 1) {
             // 成功获取返回成功的数据即可
-            return consequencer.success({
-                "my_key": "global_access_token",
-                "value": refreshAccessToken.data,
-                "expire_timestamp": (Date.parse(new Date()) + 7200000 - 5)
-            });
+            return consequencer.success(refreshAccessToken.data);
+
         } else {
             // 获取失败的情况下 返回 失败
             return refreshAccessToken;
+            
         }
     }
     
@@ -148,7 +141,7 @@ class weixinService extends Service {
 
             // 判断返回的数据是否正确
             if (val.errcode === 0) {
-                return request.success(val.ticket)
+                return consequencer.success(val.ticket);
             }
             return consequencer.error(`通过公众号的全局唯一接口调用凭据 access_token 交换 公众号用于调用微信JS接口的临时票据 jsapi_ticket 数据有误, 原因: ${val.errmsg}.`);
 
@@ -156,7 +149,7 @@ class weixinService extends Service {
             return consequencer.error(`通过公众号的全局唯一接口调用凭据 access_token 交换 公众号用于调用微信JS接口的临时票据 jsapi_ticket 错误, 原因: ${error}.`);
         });
 
-        // 判断 通过公众号的全局唯一接口调用凭据 access_token 交换 公众号用于调用微信JS接口的临时票据 jsapi_ticket 有误
+        // 判断 通过公众号的全局唯一接口调用凭据 access_token 交换 公众号用于调用微信JS接口的临时票据 jsapi_ticket 是否有误
         if (newJsapiTicketQuery.result !== 1) {
             // 如果有误的情况下 直接返回错误结果
             return newJsapiTicketQuery
