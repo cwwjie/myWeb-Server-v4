@@ -136,7 +136,7 @@ class weixinService extends Service {
 
         // 成功获取 获取公众号的全局唯一接口调用凭据 的情况
         // 【过期-第二步】通过公众号的全局唯一接口调用凭据 access_token 交换 公众号用于调用微信JS接口的临时票据 jsapi_ticket
-        let newJsapiTicketQuery = await getjsonby(`https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=${access_token}&type=jsapi`)
+        let newJsapiTicketQuery = await getjsonby(`https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=${global_access_token.data}&type=jsapi`)
         .then(val => {
             // 返回的数据格式参考例子
             // val = {
@@ -179,22 +179,6 @@ class weixinService extends Service {
             // 存储 jsapi_ticket 失败了也算 失败
             return consequencer.error('SQL存储jsapi_ticket失败', 2, newjsapi_ticket);
         }
-    }
-    
-    /**
-     * 保存 jsapi_ticket
-     */
-    async saveJsApi_ticket(jsapi_ticket) {
-        let expire_timestamp = Date.parse(new Date()) + 7200000;
-        
-        let awaitSave = await this.ctx.app.mysql.query(`update weixin set value='${jsapi_ticket}',expire_timestamp='${expire_timestamp}' where my_key='jsapi_ticket';`);
-
-        // 判断是否插入成功
-        if (awaitSave.warningCount === 0) {
-            return consequencer.success();
-        }
-        
-        return consequencer.error('SQL存储jsapi_ticket失败', 2, awaitSave);
     }
 }
 
