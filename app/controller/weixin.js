@@ -184,7 +184,7 @@ class WeixinController extends Controller {
         let nonceStr = createRandomStr(15); 
 
         // 生成 timestamp 时间戳 精确到 秒
-        let timestamp = `${new Date().getTime() / 1000}`; // 必须字符串
+        let timestamp = `${parseInt(new Date().getTime() / 1000)}`; // 必须字符串
 
         /**
          * 对所有待签名参数按照字段名的 ASCII 码从小到大排序（字典序）后，使用URL键值对的格式（即key1=value1&key2=value2…）拼接成字符串string1
