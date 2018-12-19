@@ -35,7 +35,7 @@ module.exports = app => {
     router.get('/weixin', controller.weixin.index); // 测试
     router.get('/weixin/handle', controller.weixin.responseHandle); // 微信验证开发者服务器
     router.post('/weixin/handle', controller.weixin.messageHandle); // 文本消息
-    router.get('/weixin/get/jssdkconfig', controller.weixin.getWxConfig); // 获取公众号用于调用微信JS接口的配置信息
+    router.get('/weixin/get/jssdkconfig', controller.weixin.getWxConfig); // 获取公众号用于调用微信JS接口的权限验证配置信息
 
     // 百度
     router.get('/baidu', controller.baidu.index); // 测试
