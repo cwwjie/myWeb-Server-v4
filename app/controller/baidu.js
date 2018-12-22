@@ -2,7 +2,7 @@ const Controller = require('egg').Controller;
 
 class WeixinController extends Controller {
     async index() {
-        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in baidu';
+        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【baidu】.';
     }
 
     /**

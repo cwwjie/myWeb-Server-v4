@@ -5,7 +5,7 @@ const consequencer = require('./../utils/consequencer');
 
 class HomeController extends Controller {
     async index() {
-        this.ctx.body = '/english/';
+        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【english】.';
     }
 
     /**

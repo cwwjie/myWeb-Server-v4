@@ -6,7 +6,7 @@ const lodash = require('lodash');
 class DynamicController extends Controller {
 
     async index() { // 测试入口
-        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in dynamic.';
+        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【dynamic】.';
     }
 
     /**

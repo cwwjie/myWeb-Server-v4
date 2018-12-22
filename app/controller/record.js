@@ -5,7 +5,7 @@ const consequencer = require('./../utils/consequencer');
 class RecordController extends Controller {
 
     async index() { // 测试入口
-        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in record.';
+        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【record】.';
     }
 
     /**

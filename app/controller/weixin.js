@@ -9,7 +9,7 @@ const createRandomStr = require('./../utils/createRandomStr');
 
 class WeixinController extends Controller {
     async index() {
-        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in weixin';
+        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【weixin】.';
     }
 
     /**

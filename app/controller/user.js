@@ -3,7 +3,7 @@ const consequencer = require('./../utils/consequencer');
 
 class UserController extends Controller {
     async index() {
-        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in user';
+        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【user】.';
     }
 
     /**

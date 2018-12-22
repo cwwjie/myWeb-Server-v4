@@ -6,7 +6,7 @@ var querystring = require("querystring");
  * @param {string} hostname 请求的主机名 例如: api.weixin.qq.com
  * @param {string} path 地址 例如: /cgi-bin/menu/create?access_token=ACCESS_TOKEN
  * @param {object} reqData 请求的参数
- * @return {Promise} resolve: {}, reject: 'error';
+ * @return {Promise} Promise
  */
 module.exports = (hostname, path, reqData) => new Promise((resolve, reject) => {
     const postData = querystring.stringify(reqData);
@@ -29,11 +29,13 @@ module.exports = (hostname, path, reqData) => new Promise((resolve, reject) => {
         if (res.statusCode !== 200) {
             res.resume();
             return reject(res);
+
         }
 
         if (!/^application\/json/.test(res.headers['content-type'])) {
             res.resume();
             return reject(`请求成功, 但是返回错误的数据. 原因: 不是json格式}`);
+
         }
 
         res.setEncoding('utf8');
@@ -41,15 +43,18 @@ module.exports = (hostname, path, reqData) => new Promise((resolve, reject) => {
             datas.push(data);
             size += data.length;
         });
+
         res.on('end', () => {
             let buff = Buffer.concat(datas, size);
             let result = buff.toString();
             resolve(JSON.parse(result));
+
         });
     });
 
     req.on('error', err => {
         reject(err);
+        
     });
     
     req.write(postData);

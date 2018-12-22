@@ -40,4 +40,8 @@ module.exports = app => {
     // 百度
     router.get('/baidu', controller.baidu.index); // 测试
     router.get('/baidu/text2audio/token', controller.baidu.getText2audioAccessToken); // 获取 百度音频的应用程序编程接口凭证
+
+    // github
+    router.get('/github', controller.github.index); // 提供测试接口
+    router.get('/github/spider/rejiejay', controller.github.spiderRejiejay); // 爬取 rejiejay 页面
 };
