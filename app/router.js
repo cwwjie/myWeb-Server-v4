@@ -43,5 +43,5 @@ module.exports = app => {
 
     // github
     router.get('/github', controller.github.index); // 提供测试接口
-    router.get('/github/spider/rejiejay', controller.github.spiderRejiejay); // 爬取 rejiejay 页面
+    router.get('/github/get/graphsvg', controller.github.getRejiejayGithubGraphSvg); // 爬取 rejiejay 页面
 };

@@ -1,7 +1,8 @@
 // 框架类
+const path = require('path');
 const Controller = require('egg').Controller;
 // 组件类
-const consequencer = require('./../utils/consequencer');
+const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
 
 class HomeController extends Controller {
     async index() {

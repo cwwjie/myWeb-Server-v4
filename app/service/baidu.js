@@ -1,10 +1,11 @@
 // 框架类
+const path = require('path');
 const Service = require('egg').Service;
 // 组件类
-const consequencer = require('./../utils/consequencer');
-const getjsonby = require('./../utils/getjsonbyhttps');
+const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
+const getjsonby = require(path.relative(__dirname, './app/utils/getjsonbyhttps'));
 // 配置类
-const config = require('./../../config/config.default.js');
+const config = require(path.relative(__dirname, './config/config.default.js'));
 
 class baiduService extends Service {
     /**

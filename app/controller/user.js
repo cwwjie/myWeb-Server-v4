@@ -1,5 +1,8 @@
+// 框架类
+const path = require('path');
 const Controller = require('egg').Controller;
-const consequencer = require('./../utils/consequencer');
+// 组件类
+const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
 
 class UserController extends Controller {
     async index() {
@@ -17,8 +20,8 @@ class UserController extends Controller {
 
         let myUserToken = await this.ctx.service.user.getPassword(this.ctx.query.password);
 
-         // 查询失败
-         if (myUserToken.result !== 1) {
+        // 查询失败
+        if (myUserToken.result !== 1) {
             return this.ctx.body = myUserToken;
         }
 

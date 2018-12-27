@@ -1,6 +1,8 @@
+// 框架类
+const path = require('path');
 const Controller = require('egg').Controller;
-
-const consequencer = require('./../utils/consequencer');
+// 组件类
+const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
 
 class RecordController extends Controller {
 

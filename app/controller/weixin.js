@@ -1,11 +1,12 @@
 // 框架类
+const path = require('path');
 const Controller = require('egg').Controller;
 const parseString = require('xml2js').parseString;
 const lodash = require('lodash');
 // 组件类
-const consequencer = require('./../utils/consequencer');
-const encryption = require('./../utils/encryption');
-const createRandomStr = require('./../utils/createRandomStr');
+const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
+const encryption = require(path.relative(__dirname, './app/utils/encryption'));
+const createRandomStr = require(path.relative(__dirname, './app/utils/createRandomStr'));
 
 class WeixinController extends Controller {
     async index() {

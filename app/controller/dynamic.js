@@ -1,3 +1,6 @@
+/**
+ * 这几个是 将会废弃的接口
+ */
 const Controller = require('egg').Controller;
 
 const consequencer = require('./../utils/consequencer');

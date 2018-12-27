@@ -1,6 +1,9 @@
+// 框架类
+const path = require('path');
 const Service = require('egg').Service;
-const consequencer = require('./../utils/consequencer');
-const getjsonby = require('./../utils/getjsonbyhttps');
+// 组件类
+const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
+const getjsonby = require(path.relative(__dirname, './app/utils/getjsonbyhttps'));
 
 class weixinService extends Service {
     /**

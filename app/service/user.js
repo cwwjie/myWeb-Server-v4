@@ -1,8 +1,11 @@
+// 框架类
+const path = require('path');
 const Service = require('egg').Service;
 const lodash = require('lodash');
-const Mailer = require('./../utils/Mailer');
-const validatingPayloads = require('./../utils/validatingPayloads');
-const consequencer = require('./../utils/consequencer');
+// 组件类
+const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
+const Mailer = require(path.relative(__dirname, './app/utils/Mailer'));
+const validatingPayloads = require(path.relative(__dirname, './app/utils/validatingPayloads'));
 
 class userService extends Service {
     /**

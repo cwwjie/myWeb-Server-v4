@@ -1,3 +1,6 @@
+/**
+ * 这几个是 将会废弃的接口
+ */
 const Service = require('egg').Service;
 
 class dynamicService extends Service {
