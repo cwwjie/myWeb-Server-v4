@@ -1,5 +1,3 @@
-
-
 // SHA1  
 function add(x, y) {  
     return((x & 0x7FFFFFFF) + (y & 0x7FFFFFFF)) ^ (x & 0x80000000) ^ (y & 0x80000000);  

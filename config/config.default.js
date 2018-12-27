@@ -13,6 +13,17 @@ module.exports = {
     },
 
     /**
+     * 腾讯云OSS对象存储 的通用配置，不管测试还是生产都是这个配置
+     */
+    tencentoss: {
+        origin: 'https://rejiejay-1251940173.cos.ap-guangzhou.myqcloud.com/myserver/',
+        bucket: 'rejiejay-1251940173',
+        appId: '1251940173',
+        secretId: 'AKIDZw6DLFgMZZKuFO6zSfdMr8D4j9KGmQeh',
+        secretKey: 'xkIbfU4SgfT4RZVCettgEWbR2OYTBetv',
+    },
+
+    /**
      * 百度的通用配置，不管测试还是生产都是这个配置
      */
     baidu: {
