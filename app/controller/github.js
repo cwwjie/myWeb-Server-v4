@@ -3,10 +3,16 @@ const path = require('path');
 const Controller = require('egg').Controller;
 // 组件类
 const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
+const { getObject } = require(path.relative(__dirname, './app/utils/OSS'));
 
 class GithubController extends Controller {
     async index() {
-        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【github】';
+        this.ctx.body =  await getObject('myserver/github/index.html').then(
+            res => res,
+            error => error
+        );
+        
+        // this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【github】';
     }
 
     /**
