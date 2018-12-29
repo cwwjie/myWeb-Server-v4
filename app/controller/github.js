@@ -3,16 +3,10 @@ const path = require('path');
 const Controller = require('egg').Controller;
 // 组件类
 const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
-const { getObject } = require(path.relative(__dirname, './app/utils/OSS'));
 
 class GithubController extends Controller {
     async index() {
-        this.ctx.body =  await getObject('myserver/github/index.html').then(
-            res => res,
-            error => error
-        );
-        
-        // this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【github】';
+        this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【github】';
     }
 
     /**
@@ -30,13 +24,14 @@ class GithubController extends Controller {
 
         // 过期或者无值的情况
         // 爬虫 抓取 github rejiejay 的页面
+        // 这里假设一定会成功
         let rejiejayHtml = await this.ctx.service.github.spiderRejiejay();
 
         // 存储一次
         let saveValue = await this.ctx.service.github.saveValue('graphSvg', rejiejayHtml);
 
         // 判断是否 存储失败?
-        if (graphSvg.result !== 1) {
+        if (saveValue.result !== 1) {
             // 失败的情况下
             return this.ctx.body = saveValue;
         }
