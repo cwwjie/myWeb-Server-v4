@@ -1,10 +1,10 @@
 // 框架
 const path = require('path');
-const Controller = require('egg').Controller;
+const Service = require('egg').Service;
 // 组件
 const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
 
-class HomeController extends Controller {
+class englishService extends Service {
     /**
      * 一共多少条记录
      */
@@ -116,4 +116,4 @@ class HomeController extends Controller {
     }
 }
 
-module.exports = HomeController;
+module.exports = englishService;
