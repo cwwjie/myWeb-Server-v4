@@ -1,6 +1,6 @@
 const Controller = require('egg').Controller;
 
-class WeixinController extends Controller {
+class BaiduController extends Controller {
     async index() {
         this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【baidu】.';
     }
@@ -21,4 +21,4 @@ class WeixinController extends Controller {
     }
 }
 
-module.exports = WeixinController;
+module.exports = BaiduController;

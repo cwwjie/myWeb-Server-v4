@@ -41,4 +41,7 @@ module.exports = app => {
     // github
     router.get('/github', controller.github.index); // 提供测试接口
     router.get('/github/get/graphsvg', controller.github.getRejiejayGithubGraphSvg); // 爬取 rejiejay 页面
+
+    // 有道云笔记
+    router.get('/youdao', controller.youdao.index); // 提供测试接口
 };
