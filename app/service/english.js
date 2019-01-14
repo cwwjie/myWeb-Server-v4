@@ -30,10 +30,29 @@ class englishService extends Service {
     }
 
     /**
-     * 随机查询16条记录
+     * 随机查询N条记录
+     * @param {number} count 多少条记录 
      */
-    async getByRandom() {
-        return await this.ctx.app.mysql.query('select * from english order by rand() limit 16;');
+    async getByRandom(count) {
+        count = count ? count : 16;
+
+        return await this.ctx.app.mysql.query(`select * from english order by rand() limit ${count};`);
+    }
+
+    /**
+     * 根据Id 查询一条记录
+     * @param {number || string} id 记录的唯一 id （此 id 默认是正确的不进行 校验）
+     */
+    async getOneById(id) {
+        // 执行SQL语句
+        let checkRecord = await this.ctx.app.mysql.query(`select * from english where id="${id}" ;`);
+
+        // 判断是否查询成功
+        if (checkRecord instanceof Array === false || checkRecord.length === 0) {
+            return consequencer.error('无此 id 记录');
+        }
+        
+        return consequencer.success(checkRecord[0]);
     }
 
     /**

@@ -36,8 +36,23 @@ class HomeController extends Controller {
      * 随机查询16条记录
      */
     async getByRandom() {
-        let result = await this.ctx.service.english.getByRandom();
+        let myCount = this.ctx.request.query.count ? this.ctx.request.query.count : null;
+        
+        let result = await this.ctx.service.english.getByRandom(myCount);
         this.ctx.body = consequencer.success(result);
+    }
+
+    /**
+     * 根据 id 查询一条记录
+     */
+    async getOneById() {
+        // 判断 是否存在 id 并且是否合法
+        if (!this.ctx.request.query || !this.ctx.request.query.id || !/^\d+$/.test(this.ctx.request.query.id) /** 这个正则是判断整数 */) {
+            return this.ctx.body = consequencer.error('id is error');
+        }
+
+        // id 合法 直接查询即可
+        this.ctx.body = await this.ctx.service.english.getOneById(this.ctx.request.query.id);
     }
 
     /**

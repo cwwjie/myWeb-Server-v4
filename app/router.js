@@ -4,11 +4,7 @@ module.exports = app => {
     // 返回的路由最好都是小写不要驼峰命名
     router.get('/', controller.home.index); // 首页部分
     router.post('/', controller.home.index); // 首页部分
-
-    router.get('/dynamic', controller.dynamic.index); // 动态部分
-    router.get('/dynamic/get/list', controller.dynamic.getByList); // 返回所有的动态记录 根据列表的形式
-    router.get('/dynamic/get/listandgroup', controller.dynamic.getByListAndGroup); // 返回所有的动态记录 根据列表与分组的形式
-
+    
     // 记录
     router.get('/record/', controller.record.index); // 测试
     router.get('/record/get/one', controller.record.getOneByRandom); // 随机查询一条记录
@@ -23,6 +19,7 @@ module.exports = app => {
     router.get('/english/', controller.english.index); // 提供 路由 测试
     router.get('/english/get/list', controller.english.getListBy); // 根据页码查询记录
     router.get('/english/get/random', controller.english.getByRandom); // 随机查询17条数据
+    router.get('/english/get/id', controller.english.getOneById); // 根据Id 查询一条记录
     router.post('/english/add', controller.english.add); // 新增一条记录
     router.post('/english/edit', controller.english.edit); // 编辑一条记录
     router.post('/english/del', controller.english.del); // 删除一条记录
