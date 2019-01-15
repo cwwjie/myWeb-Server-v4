@@ -6,7 +6,12 @@ module.exports = {
         }
     },
 
-    // 这个不知道是哪里来的，暂时放置在这里吧
+    // 有道云笔记
+    youdao: {
+        origin: 'https://notesandbox.youdao.com', // 请求源
+    },
+
+    // 这个不知道是哪个公众号的，暂时放置在这里吧
     // weixin: {
     //     appID: 'wx34ce4f0ce6eadb39',
     //     appsecret: '317b46c976749223abf57213fce07b0f'
@@ -24,7 +29,16 @@ module.exports = {
         },
     },
 
-    security: { // 跨域请求
-        domainWhiteList: [ 'http://localhost:8000', 'http://localhost:3000', 'http://localhost:4200', 'http://localhost' ],
+    security: { // 解决跨域问题
+        csrf: {
+            enable: false,
+            ignoreJSON: true
+        },
+        domainWhiteList: '*',
+    },
+
+    cors: { // 解决跨域问题
+        origin: '*',
+        allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
     }
 };

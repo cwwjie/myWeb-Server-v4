@@ -33,6 +33,14 @@ module.exports = {
         SecretKey: 'IzdrDWlkobd5j32WESEwlkiPut0RTYMo',
     },
 
+    /**
+     * microsoft 微软通用配置
+     */
+    microsoft: {
+        appid: '1bf4ae32-0015-4bba-92ed-dd6a125e3e7c', // 应用程序 ID
+        appsecret: 'avprqT3?iqTLQUOF4486|~#', // 应用程序 密匙
+    },
+
     security: {
         csrf: false
     },

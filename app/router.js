@@ -44,4 +44,8 @@ module.exports = app => {
 
     // 有道云笔记
     router.get('/youdao', controller.youdao.index); // 提供测试接口
+
+    // 微软
+    router.get('/microsoft', controller.microsoft.index); // 提供测试接口
+    router.get('/microsoft/authorize', controller.microsoft.authorize); // 获取令牌
 };

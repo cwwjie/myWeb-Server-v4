@@ -5,6 +5,11 @@ module.exports = {
         }
     },
 
+    // 有道云笔记
+    youdao: {
+        origin: 'https://note.youdao.com', // 请求源
+    },
+
     mysql: {
         app: true,    // 是否加载到 app 上，默认开启
         agent: false, // 是否加载到 agent 上，默认关闭
