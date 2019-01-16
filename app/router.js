@@ -48,4 +48,5 @@ module.exports = app => {
     // 微软
     router.get('/microsoft', controller.microsoft.index); // 提供测试接口
     router.get('/microsoft/authorize', controller.microsoft.authorize); // 获取令牌
+    router.get('/microsoft/authorize/storage', controller.microsoft.storageAuthorizeParam); // 暂存授权令牌的数据
 };

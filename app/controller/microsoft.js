@@ -3,33 +3,88 @@ const path = require('path');
 const Controller = require('egg').Controller;
 // 组件类
 const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
-const postformurlencodedbyhttps = require(path.relative(__dirname, './app/utils/postformurlencodedbyhttps'));
+const convertString = require(path.relative(__dirname, './app/utils/convertString'));
 
 class MicrosoftController extends Controller {
     async index() {
         // this.app.config.microsoft 配置文件
         this.ctx.body = 'Hello ~~~ Welcome to Rejiejay server side and your place in 【microsoft】.';
     }
+
+    /**
+     * 缓存授权的参数
+     * 因为这些地址 和 状态 授权项目 目的是为了 防止跨网站请求伪造攻击
+     */
+    async storageAuthorizeParam() {
+        // 判断参数
+        if (!this.ctx.request.query || !this.ctx.request.query.redirect_uri) {
+            return this.ctx.body = consequencer.error('redirect_uri 参数错误', 233);
+        }
+        if (!this.ctx.request.query || !this.ctx.request.query.scope) {
+            return this.ctx.body = consequencer.error('scope 参数错误', 233);
+        }
+        if (!this.ctx.request.query || !this.ctx.request.query.state) {
+            return this.ctx.body = consequencer.error('state 参数错误', 233);
+        }
+
+        // 缓存这些参数
+        let redirect_uri = this.ctx.request.query.redirect_uri;
+        let scope = this.ctx.request.query.scope;
+        let state = this.ctx.request.query.state;
+
+        // 成功失败都直接返回去即可
+        this.ctx.body = await this.ctx.service.microsoft.saveBykey(
+            state, 
+            convertString.stringToBase64(
+                JSON.stringify({
+                    redirect_uri: redirect_uri,
+                    scope: scope,
+                })
+            )
+        );
+    }
     
     /**
-     * 获取令牌 （code）
+     * 获取令牌
      */
     async authorize() {
         // 判断参数
-        let authorize_code = '';
-        if (this.ctx.request.query && this.ctx.request.query.code) {
-            authorize_code = this.ctx.request.query.code;
-
-        } else {
-            return this.ctx.body = consequencer.error('cdoe 参数错误', 233);
-
+        if (!this.ctx.request.query || !this.ctx.request.query.code) {
+            return this.ctx.body = consequencer.error('code 参数错误', 233);
+        }
+        if (!this.ctx.request.query || !this.ctx.request.query.state) {
+            return this.ctx.body = consequencer.error('state 参数错误', 233);
         }
 
+        let authorize_code = this.ctx.request.query.code;
+        let authorize_state = this.ctx.request.query.state;
+        
+        // 先根据授权的状态查询 是否存在这个授权动作
+        const awaitkeyword = await this.ctx.service.microsoft.getBykey(authorize_state);
+
+        // 判断是否存在这个授权动作
+        if (awaitkeyword.result !== 1) {
+            // 不存在的情况下, 返回跨域攻击
+            return this.ctx.body = consequencer.error('检测到跨网站请求伪造攻击, 因为无此授权动作', 123);
+
+        } else {
+            // 存在的情况下, 删除掉这个缓存
+            let delState = await this.ctx.service.microsoft.delBykey(authorize_state);
+            
+            // 判断删除是否成功
+            if (delState.result !== 1) {
+                // 失败的情况下, 返回失败
+                return this.ctx.body = delState;
+            }
+        }
+
+        let my_authorize = JSON.parse(convertString.base64ToString(awaitkeyword.data.key_value));
+
         // 初始化已经 授权的权限
-        let authorize_scope = this.ctx.request.query.scope ? this.ctx.request.query.scope : encodeURIComponent(['Notes.Create', 'Notes.Read', 'Notes.Read.All', 'Notes.ReadWrite', 'Notes.ReadWrite.All', 'Notes.ReadWrite.CreatedByApp'].join(' '));
+        let authorize_scope = my_authorize.scope ? my_authorize.scope : encodeURIComponent(['Notes.Create', 'Notes.Read', 'Notes.Read.All', 'Notes.ReadWrite', 'Notes.ReadWrite.All', 'Notes.ReadWrite.CreatedByApp'].join(' '));
 
         // 初始化已经 重定向的url
-        let redirect_uri = this.ctx.request.query.redirect_uri ? this.ctx.request.query.redirect_uri : encodeURIComponent('https://www.rejiejay.cn/microsoft/microsoft/token.html');
+        let redirect_uri = my_authorize.redirect_uri ? my_authorize.redirect_uri : encodeURIComponent('https://www.rejiejay.cn/microsoft/token.html');
 
         let client_id = this.app.config.microsoft.appid; // 注册门户 (apps.dev.microsoft.com) 分配给应用的应用程序 ID。
 
@@ -44,13 +99,60 @@ class MicrosoftController extends Controller {
             client_secret: client_secret,
         }
         
-        let awaitAccesstoken = await postformurlencodedbyhttps('https://login.microsoftonline.com', '/common/oauth2/v2.0/token', reqData)
-        .then(
-            res => consequencer.success(res),
-            error => consequencer.error(`向微信服务器请求报错, 原因: ${error}`, 400)
-        );
+        // 向 microsoftonline 请求获取 token
+        let awaitAccesstoken = await this.ctx.curl( // 文档：https://github.com/node-modules/urllib#api-doc
+            'https://login.microsoftonline.com/common/oauth2/v2.0/token', {
+                method: 'POST',
+                data: reqData,
+                contentType: 'application/x-www-form-urlencoded',
+            }
+        ).then(function (result) {
+            if (result.status === 200) {
+                let res = JSON.parse(result.data.toString('utf8'));
+                
+                // {
+                //     "token_type": "Bearer", // 表示令牌类型值 (这里是写死的)
+                //     "scope": "user.read%20Fmail.read", // 权限
+                //     "expires_in": 3600, // 过期时间
+                //     "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5HVEZ2ZEstZnl0aEV1Q...", // token
+                //     "refresh_token": "AwABAAAAvPM1KaPlrEqdFSBzjqfTGAMxZGUTdM0t4B4..." // 刷新用的 token
+                // }
+                return consequencer.success(res);
 
-        this.ctx.body = awaitAccesstoken;
+            } else {
+                return consequencer.error(result, 2334);
+            }
+        }).catch(function (err) {
+            return consequencer.error(err, 2335);
+        });
+
+        // 判断是否获取成功
+        if (awaitAccesstoken.result !== 1) {
+            // 失败的情况下 返回失败即可
+            return this.ctx.body = awaitAccesstoken;
+        }
+
+        // 成功获取token的情况下 缓存数据
+        let awaitSaveToken = await this.ctx.service.microsoft.saveBykey(
+            'access_token',
+            convertString.stringToBase64(
+                JSON.stringify({
+                    access_token: awaitAccesstoken.data.access_token,
+                    refresh_token: awaitAccesstoken.data.refresh_token,
+                    scope: awaitAccesstoken.data.scope,
+                })
+            ),
+            new Date().getTime() + awaitAccesstoken.data.expires_in
+        );
+        
+        // 判断是否缓存成功
+        if (awaitAccesstoken.result === 1) {
+            // 成功的情况, 返回查询结果
+            return this.ctx.body = awaitAccesstoken;
+        } else {
+            // 失败的情况下 返回失败存储结果即可
+            return this.ctx.body = awaitSaveToken;
+        }
     }
 }
 
