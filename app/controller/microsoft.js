@@ -81,7 +81,7 @@ class MicrosoftController extends Controller {
         let my_authorize = JSON.parse(convertString.base64ToString(awaitkeyword.data.key_value));
 
         // 初始化已经 授权的权限
-        let authorize_scope = my_authorize.scope ? my_authorize.scope : encodeURIComponent(['Notes.Create', 'Notes.Read', 'Notes.Read.All', 'Notes.ReadWrite', 'Notes.ReadWrite.All', 'Notes.ReadWrite.CreatedByApp'].join(' '));
+        let authorize_scope = my_authorize.scope ? my_authorize.scope : encodeURIComponent(['offline_access', 'Notes.Create', 'Notes.Read', 'Notes.Read.All', 'Notes.ReadWrite', 'Notes.ReadWrite.All', 'Notes.ReadWrite.CreatedByApp'].join(' '));
 
         // 初始化已经 重定向的url
         let redirect_uri = my_authorize.redirect_uri ? my_authorize.redirect_uri : encodeURIComponent('https://www.rejiejay.cn/microsoft/token.html');
@@ -100,6 +100,7 @@ class MicrosoftController extends Controller {
         }
         
         // 向 microsoftonline 请求获取 token
+        console.log('向microsoftonline请求获取token', reqData); // 输出一下日志
         let awaitAccesstoken = await this.ctx.curl( // 文档：https://github.com/node-modules/urllib#api-doc
             'https://login.microsoftonline.com/common/oauth2/v2.0/token', {
                 method: 'POST',
@@ -109,6 +110,7 @@ class MicrosoftController extends Controller {
         ).then(function (result) {
             if (result.status === 200) {
                 let res = JSON.parse(result.data.toString('utf8'));
+                console.log('成功向microsoftonline获取token', res); // 输出日志
                 
                 // {
                 //     "token_type": "Bearer", // 表示令牌类型值 (这里是写死的)
@@ -180,7 +182,7 @@ class MicrosoftController extends Controller {
         // 判断是否过期
         if (new Date().getTime() < awaitAuthorize.data.expire_timestamp) {
             // 未过期的情况下，返回token
-            return consequencer.success(my_authorize.access_token);
+            return this.ctx.body = consequencer.success(my_authorize.access_token);
         }
 
         /**
@@ -188,7 +190,7 @@ class MicrosoftController extends Controller {
          */
         let refresh_token = my_authorize.refresh_token;
 
-        let authorize_scope = my_authorize.scope ? my_authorize.scope : encodeURIComponent(['Notes.Create', 'Notes.Read', 'Notes.Read.All', 'Notes.ReadWrite', 'Notes.ReadWrite.All', 'Notes.ReadWrite.CreatedByApp'].join(' '));
+        let authorize_scope = my_authorize.scope ? my_authorize.scope : encodeURIComponent(['offline_access', 'Notes.Create', 'Notes.Read', 'Notes.Read.All', 'Notes.ReadWrite', 'Notes.ReadWrite.All', 'Notes.ReadWrite.CreatedByApp'].join(' '));
 
         // 初始化已经 重定向的url
         let redirect_uri = my_authorize.redirect_uri ? my_authorize.redirect_uri : encodeURIComponent('https://www.rejiejay.cn/microsoft/token.html');
@@ -227,7 +229,12 @@ class MicrosoftController extends Controller {
                 return consequencer.success(res);
 
             } else {
-                return consequencer.error(result, 400);
+                
+                return consequencer.error({
+                    params: reqData, // 直接返给前端, 看个啥日志
+                    response: result,
+                    message: JSON.parse(result.data.toString('utf8'))
+                }, 400);
             }
 
         }).catch(error => consequencer.error(error, 400));
@@ -255,7 +262,7 @@ class MicrosoftController extends Controller {
         // 判断是否 缓存新的访问令牌 成功
         if (awaitSaveToken.result === 1) {
             // 缓存新的访问令牌 成功 返回查询结果
-            return this.ctx.body = consequencer.success(awaitRefreshToken.access_token);
+            return this.ctx.body = consequencer.success(awaitRefreshToken.data.access_token);
         } else {
             // 缓存新的访问令牌 失败 返回错误信息
             return this.ctx.body = awaitSaveToken;
