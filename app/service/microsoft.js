@@ -60,7 +60,7 @@ class MicrosoftService extends Service {
     }
 
     /**
-     * 删除
+     * 通过 关键字 删除 一条记录
      */
     async delBykey(keyword) {
         // 先查询 是否存在这个键
@@ -81,6 +81,41 @@ class MicrosoftService extends Service {
 
         }  else {
             return consequencer.error(`数据删除失败, 原因: ${deleteRecord.message}.`);
+
+        }
+    }
+
+    /**
+     * 删除 标签为 pages 的所有记录
+     */
+    async delLablePages() {
+        // 执行删除记录 SQL
+        let deleteItem = await this.ctx.app.mysql.query(`delete from microsoft where tag_lable="pages";`);
+
+        // 判断SQL 是否执行成功
+        if (deleteItem && deleteItem.warningCount === 0) {
+            return consequencer.success();
+
+        }  else {
+            return consequencer.error(`执行清空操作失败, 原因: ${deleteRecord.message}.`);
+
+        }
+    }
+
+    /**
+     * 通过分区id 记录 一个 pages 页面
+     */
+    async savePagesByParentSectionId(parentSectionId, contentUrl) {
+        // 直接执行SQL
+        let awaitsave = await this.ctx.app.mysql.query(`insert into microsoft (key_word, key_value, tag_lable, expire_timestamp) values ("${parentSectionId}", "${contentUrl}", "pages", "${new Date().getTime()}");`);
+
+        // 判断 SQL 是否执行成功
+        if (awaitsave && awaitsave.warningCount === 0) {
+            // 如果成功修改 直接返回数即可
+            return consequencer.success();
+
+        } else {
+            return consequencer.error(`存储变量失败, 原因: ${JSON.stringify(awaitsave)}.`);
 
         }
     }

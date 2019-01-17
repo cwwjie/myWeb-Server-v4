@@ -268,6 +268,112 @@ class MicrosoftController extends Controller {
             return this.ctx.body = awaitSaveToken;
         }
     }
+
+    /**
+     * 缓存所有页面
+     */
+    async storageIteratorPages() {
+        const _this = this;
+        const payload = this.ctx.request.body;
+
+        /**
+         * 判断参数
+         */
+        if (!payload || !payload.allPages || payload.allPages instanceof Array === false) {
+            return this.ctx.body = consequencer.error('payload is error');
+        }
+
+        /**
+         * 校验参数合法性
+         */
+        let isValid = true;
+        payload.allPages.map(val => {
+            if (!val.contentUrl || !val.parentSectionId) {
+                isValid = false;
+            }
+        });
+        if (isValid === false) {
+            return this.ctx.body = consequencer.error('参数不合法!');
+        }
+
+        /**
+         * 验证权限(是否登录)
+         */
+        // let myVerify = await this.ctx.service.user.validatingPayload();
+        // if (myVerify.result !== 1) {
+        //     return this.ctx.body = myVerify;
+        // }
+        
+        /**
+         * 执行清空操作
+         */
+        let awaitDelLablePages = await this.ctx.service.microsoft.delLablePages();
+        if (awaitDelLablePages.result !== 1) {
+            // 清空操作失败也不做任何处理
+            return this.ctx.body = awaitDelLablePages;
+        }
+
+        // 设置缓存状态为 缓存中
+        let awaitStatus = await this.ctx.service.microsoft.saveBykey('storageIteratorPagesStatus', 'caching');
+
+        // 判断缓存状态是否成功
+        if (awaitStatus.result === 1) {
+            this.ctx.body = consequencer.success(null, '正在缓存中ing...');
+
+        } else {
+            this.ctx.body = consequencer.error(`设置缓存状态失败, ${awaitStatus.message}`);
+
+        }
+
+        /**
+         * 循环执行缓存的SQL
+         */
+        for (let i = 0; i < payload.allPages.length; i++) {
+            let contentUrl = payload.allPages[i].contentUrl;
+            let parentSectionId = payload.allPages[i].parentSectionId;
+
+            let awaitSavePages = await _this.ctx.service.microsoft.savePagesByParentSectionId(parentSectionId, contentUrl);
+
+            if (awaitSavePages.result === 1) {
+                console.log(`循环缓存Pages${i + 1}，执行成功!`);
+            } else {
+                console.log(`循环缓存Pages${i + 1}，执行失败!`, awaitSavePages);
+            }
+
+            // 最后一次
+            if (i === (payload.allPages.length - 1)) {
+                // 设置缓存状态为 缓存成功
+                let awaitStatusfinished = await this.ctx.service.microsoft.saveBykey('storageIteratorPagesStatus', 'finished');
+
+                if (awaitStatusfinished.result === 1) {
+                    console.log(`成功设置缓存状态为finished`);
+
+                } else {
+                    console.log(`设置缓存状态失败!`);
+                }
+            }
+        }
+    }
+
+    /**
+     * 查看缓存所有页面的状态
+     */
+    async getStoragePagesStatus() {
+        let awaitStatus = await this.ctx.service.microsoft.getBykey('storageIteratorPagesStatus');
+
+        // 判断是否有缓存状态
+        if (awaitStatus.result !== 1) {
+            // 没有的情况下, 返回
+            return this.ctx.body = consequencer.error(`你还没有设置任何缓存状态噢`, 400);
+        }
+
+        // 有缓存状态的情况下
+        if (awaitStatus.data.key_value === 'finished') {
+            this.ctx.body = consequencer.success(null, '缓存已完成');
+        } else {
+            this.ctx.body = consequencer.error(`正在缓存${awaitStatus.data.key_value}`, 233);
+        }
+    }
 }
 
 module.exports = MicrosoftController;
