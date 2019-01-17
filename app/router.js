@@ -46,10 +46,11 @@ module.exports = app => {
     router.get('/youdao', controller.youdao.index); // 提供测试接口
 
     // 微软
-    router.get('/microsoft', controller.microsoft.index); // 提供测试接口
-    router.get('/microsoft/authorize', controller.microsoft.authorize); // 获取令牌
-    router.get('/microsoft/authorize/storage', controller.microsoft.storageAuthorizeParam); // 暂存授权令牌的数据
-    router.get('/microsoft/pages/status', controller.microsoft.getStoragePagesStatus); // 查看缓存所有页面的状态
-    router.post('/microsoft/pages/storage', controller.microsoft.storageIteratorPages); // 缓存所有页面
-    router.post('/microsoft/token', controller.microsoft.getToken); // 获取token
+    router.get('/microsoft', controller.microsoft.index); // 【测试】
+    router.get('/microsoft/authorize', controller.microsoft.authorize); // 【code】获取令牌
+    router.post('/microsoft/token', controller.microsoft.getToken); // 【token】 
+    router.get('/microsoft/authorize/storage', controller.microsoft.storageAuthorizeParam); // 【授权暂存】 暂存授权令牌要使用到的数据
+    router.get('/microsoft/pages/status', controller.microsoft.getStoragePagesStatus); // 【状态】 查看缓存所有页面的状态
+    router.post('/microsoft/pages/storage', controller.microsoft.storageIteratorPages); // 【页面】 缓存所有页面
+    router.get('/microsoft/pages/get/random', controller.microsoft.getNotebookByParentSectionId); // 【页面】 根据分区id随机查询 OneNote notebook 
 };

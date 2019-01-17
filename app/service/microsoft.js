@@ -119,6 +119,22 @@ class MicrosoftService extends Service {
 
         }
     }
+
+    /**
+     * 根据分区id随机查询 OneNote notebook 
+     */
+    async getRandomPagesBy(parentSectionId) {
+        let awaitSQL = await this.ctx.app.mysql.query(`select * from microsoft where key_word="${parentSectionId}" order by rand() limit 1;`);
+
+        // 判断是否查询成功
+        if (awaitSQL instanceof Array && awaitSQL.length > 0) {
+            return consequencer.success(awaitSQL[0]);
+
+        } else {
+            return consequencer.error('无此 parentSectionId 记录');
+            
+        }
+    }
 }
 
 module.exports = MicrosoftService;

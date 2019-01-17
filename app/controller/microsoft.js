@@ -342,8 +342,8 @@ class MicrosoftController extends Controller {
 
             // 最后一次
             if (i === (payload.allPages.length - 1)) {
-                // 设置缓存状态为 缓存成功
-                let awaitStatusfinished = await this.ctx.service.microsoft.saveBykey('storageIteratorPagesStatus', 'finished');
+                // 设置缓存状态为 缓存成功, 并且设置过期时间为一天后
+                let awaitStatusfinished = await this.ctx.service.microsoft.saveBykey('storageIteratorPagesStatus', 'finished', (new Date().getTime() + (1000 * 60 * 60 * 24)));
 
                 if (awaitStatusfinished.result === 1) {
                     console.log(`成功设置缓存状态为finished`);
@@ -369,10 +369,24 @@ class MicrosoftController extends Controller {
 
         // 有缓存状态的情况下
         if (awaitStatus.data.key_value === 'finished') {
-            this.ctx.body = consequencer.success(null, '缓存已完成');
+            this.ctx.body = consequencer.success(awaitStatus.data, '缓存已完成');
         } else {
             this.ctx.body = consequencer.error(`正在缓存${awaitStatus.data.key_value}`, 233);
         }
+    }
+
+    /**
+     * 根据分区id随机查询 OneNote notebook 
+     */
+    async getNotebookByParentSectionId() {
+        // 判断 是否存在 id
+        if (!this.ctx.request.query || !this.ctx.request.query.parentSectionId) {
+            return this.ctx.body = consequencer.error('parentSectionId is error');
+        }
+
+        let parentSectionId = this.ctx.request.query.parentSectionId;
+
+        this.ctx.body = await this.ctx.service.microsoft.getRandomPagesBy(parentSectionId);
     }
 }
 
