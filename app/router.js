@@ -53,4 +53,5 @@ module.exports = app => {
     router.get('/microsoft/pages/status', controller.microsoft.getStoragePagesStatus); // 【状态】 查看缓存所有页面的状态
     router.post('/microsoft/pages/storage', controller.microsoft.storageIteratorPages); // 【页面】 缓存所有页面
     router.get('/microsoft/pages/get/random', controller.microsoft.getNotebookByParentSectionId); // 【页面】 根据分区id随机查询 OneNote notebook 
+    router.get('/microsoft/pages/img', controller.microsoft.getNotebookImg); // 【图】 值换图片
 };
