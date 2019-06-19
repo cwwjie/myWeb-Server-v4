@@ -3,6 +3,7 @@ const path = require('path');
 const Service = require('egg').Service;
 // 组件类
 const consequencer = require(path.relative(__dirname, './app/utils/consequencer'));
+const convertString = require(path.relative(__dirname, './app/utils/convertString'));
 
 class recordService extends Service {
     /**
@@ -29,7 +30,18 @@ class recordService extends Service {
         /**
          * LIMIT 第一个数 是从几开始查 第二个是代表查多少个 
          */
-        return await this.ctx.app.mysql.query(`select * from record order by timestamp desc LIMIT ${num ? (num * 10) : 0}, 10;`);
+        let awaitquery = await this.ctx.app.mysql.query(`select * from record order by timestamp desc LIMIT ${num ? (num * 10) : 0}, 10;`);
+        
+        // 是否查询到数据
+        if (awaitquery && awaitquery instanceof Array && awaitquery.length > 0) {
+            // 要将 base64 转换为 utf-8
+            awaitquery = awaitquery.map(val => {
+                val.content = convertString.base64ToString(val.content);
+                return val
+            });
+        }
+
+        return awaitquery
     }
 
     /**
@@ -45,7 +57,11 @@ class recordService extends Service {
             return consequencer.error('无此 id 记录');
         }
         
-        return consequencer.success({id: checkRecord[0].id, title: checkRecord[0].title, content: checkRecord[0].content});
+        return consequencer.success({
+            id: checkRecord[0].id, 
+            title: checkRecord[0].title, 
+            content: convertString.base64ToString(checkRecord[0].content) // 要将 base64 转换为 utf-8 
+        });
     }
 
     /**
@@ -57,7 +73,12 @@ class recordService extends Service {
         
         // 判断 查询的 SQL 是否成功
         if (selectRandom && selectRandom instanceof Array && selectRandom.length > 0) {
-            // 成功的情况返回 SQL 查询到的数据
+            // 成功的情况 要将 base64 转换为 utf-8 
+            selectRandom = selectRandom.map(val => {
+                val.content = convertString.base64ToString(val.content);
+                return val
+            });
+            // 返回 SQL 查询到的数据
             return consequencer.success(selectRandom);
 
         } else {
@@ -74,7 +95,8 @@ class recordService extends Service {
      */
     async save(title, content) {
         // 执行SQL语句
-        let saveRecord = await this.ctx.app.mysql.query(`insert into record (timestamp, title, content) values ("${new Date().getTime()}", "${title}", "${content}");`);
+        let base64content = convertString.stringToBase64(content); // 转化为 base64 存储
+        let saveRecord = await this.ctx.app.mysql.query(`insert into record (timestamp, title, content) values ("${new Date().getTime()}", "${title}", "${base64content}");`);
 
         // 判断是否保存成功
         if (saveRecord && saveRecord.warningCount === 0 && saveRecord.message === "") {
@@ -104,7 +126,8 @@ class recordService extends Service {
         }
 
         // 查询记录成功的下 执行修改的 SQL
-        let updateRecord = await this.ctx.app.mysql.query(`update record set title="${title}",content="${content}",timestamp="${new Date().getTime()}" where id="${id}";`);
+        let base64content = convertString.stringToBase64(content); // 转化为 base64 存储
+        let updateRecord = await this.ctx.app.mysql.query(`update record set title="${title}",content="${base64content}",timestamp="${new Date().getTime()}" where id="${id}";`);
 
         // 判断 SQL 是否执行成功
         if (updateRecord && updateRecord.warningCount === 0) {
